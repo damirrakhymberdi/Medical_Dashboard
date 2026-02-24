@@ -1,16 +1,33 @@
 :root {
-  --bg: #f5f6f8;
+  /* Brand + neutral system */
+  --bg: #f6f7fb;
   --surface: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e5e7eb;
+  --surface-2: #f8fafc;
+  --text: #0b1220;
+  --muted: #5b6b83;
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.14);
+
   --primary: #2563eb;
+  --primary-700: #1d4ed8;
   --primary-100: #dbeafe;
-  --hover: #f3f4f6;
-  --focus: rgba(37, 99, 235, 0.08);
-  --radius: 8px;
-  --radius-sm: 6px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --info: #0ea5e9;
+
+  --hover: rgba(15, 23, 42, 0.04);
+  --active: rgba(37, 99, 235, 0.1);
+  --focus: rgba(37, 99, 235, 0.2);
+
+  /* Sizing */
+  --radius: 12px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.14);
   --sidebar-w: 260px;
   --header-h: 56px;
 }
@@ -33,6 +50,8 @@ body {
     Roboto,
     Arial,
     sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -47,6 +66,10 @@ a {
 img {
   max-width: 100%;
   display: block;
+}
+
+.sidebar-backdrop {
+  display: none;
 }
 
 button,
@@ -75,7 +98,7 @@ textarea {
 /* Сайдбар */
 .sidebar {
   width: var(--sidebar-w);
-  background: #ffffff;
+  background: var(--surface);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -84,7 +107,7 @@ textarea {
 
 .sidebar-header {
   padding: 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
@@ -92,8 +115,12 @@ textarea {
   align-items: center;
   gap: 8px;
   padding: 11px;
-  background: #f0f9ff;
-  border: 1px solid #e0f2fe;
+  background: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.08),
+    rgba(37, 99, 235, 0.03)
+  );
+  border: 1px solid rgba(37, 99, 235, 0.18);
 }
 
 .logo-icon {
@@ -112,7 +139,7 @@ textarea {
 .logo-text {
   font-size: 18px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text);
   letter-spacing: -0.3px;
 }
 
@@ -121,20 +148,22 @@ textarea {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #6b7280;
+  color: var(--muted);
   padding: 10px 12px;
   background: transparent;
 }
 
 .support-info svg {
   flex-shrink: 0;
-  color: #9ca3af;
+  color: rgba(91, 107, 131, 0.85);
 }
 
 /* Меню */
 .menu {
   display: flex;
   flex-direction: column;
+  padding: 0px;
+  gap: 2px;
 }
 
 .menu-item {
@@ -142,12 +171,16 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 12px;
-  color: #374151;
+  padding: 10px 12px;
+  color: rgba(11, 18, 32, 0.82);
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
   position: relative;
+  border-radius: none;
 }
 
 .menu-item:hover {
@@ -159,7 +192,7 @@ textarea {
 }
 
 .menu-item.active {
-  background: #eff6ff;
+  background: var(--active);
   color: var(--primary);
 }
 
@@ -174,7 +207,7 @@ textarea {
 
 .menu-icon {
   flex-shrink: 0;
-  color: #6b7280;
+  color: rgba(91, 107, 131, 0.9);
   transition: color 0.15s ease;
 }
 
@@ -184,7 +217,7 @@ textarea {
 
 .menu-arrow {
   flex-shrink: 0;
-  color: #9ca3af;
+  color: rgba(91, 107, 131, 0.75);
   opacity: 0;
   transition: opacity 0.15s ease;
   margin-left: auto;
@@ -206,7 +239,7 @@ textarea {
 /* Хедер */
 .header {
   height: var(--header-h);
-  background: #fafbfc;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 0 16px;
   display: flex;
@@ -220,21 +253,24 @@ textarea {
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--text);
   font-size: 13px;
-  transition: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
 .header input::placeholder {
-  color: #a1a8b3;
+  color: rgba(91, 107, 131, 0.65);
   font-size: 13px;
 }
 
 .header input:focus {
-  border-color: #d1d5db;
-  background: #ffffff;
-  box-shadow: none;
+  border-color: rgba(37, 99, 235, 0.65);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px var(--focus);
   outline: none;
 }
 
@@ -242,12 +278,12 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #4b5563;
+  color: rgba(11, 18, 32, 0.75);
   font-size: 13px;
   font-weight: 500;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
-  background: #f3f4f6;
+  background: var(--surface-2);
   border: 1px solid var(--border);
 }
 
@@ -268,19 +304,19 @@ textarea {
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: rgba(91, 107, 131, 0.28);
   border-radius: 3px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: rgba(91, 107, 131, 0.42);
 }
 
 /* Карточка */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   padding: 16px;
   box-shadow: var(--shadow-sm);
 }
@@ -295,30 +331,45 @@ textarea {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: opacity 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+}
+
+.btn:focus-visible {
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.05),
+    0 0 0 4px var(--focus);
 }
 
 .btn:hover {
-  opacity: 0.9;
+  background: var(--primary-700);
 }
 
 .btn:active {
-  opacity: 0.8;
+  transform: translateY(1px);
 }
 
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
-  background: #f8fafc;
+  background: var(--surface);
   color: var(--text);
   border-color: var(--border);
 }
 
+.btn-secondary:focus-visible {
+  box-shadow: 0 0 0 4px var(--focus);
+}
+
 .btn-secondary:hover {
-  background: #f1f3f5;
+  background: var(--hover);
 }
 
 /* Поля ввода */
@@ -326,14 +377,17 @@ textarea {
   width: 100%;
   padding: 9px 12px;
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: var(--surface);
   font-size: 14px;
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
 .input:focus {
   border-color: var(--primary);
-  box-shadow: none;
+  box-shadow: 0 0 0 4px var(--focus);
   outline: none;
 }
 
@@ -346,8 +400,8 @@ textarea {
   font-size: 12px;
   font-weight: 600;
   border: 1px solid var(--border);
-  background: #f8fafc;
-  color: #334155;
+  background: var(--surface-2);
+  color: rgba(11, 18, 32, 0.75);
 }
 
 .badge.scheduled {
@@ -380,7 +434,7 @@ textarea {
   border-collapse: collapse;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   overflow: hidden;
   font-size: 14px;
 }
@@ -393,13 +447,13 @@ textarea {
 }
 
 .table th {
-  color: #475569;
-  background: #f8fafc;
+  color: rgba(11, 18, 32, 0.7);
+  background: var(--surface-2);
   font-weight: 600;
 }
 
 .table tr:hover td {
-  background: #f9fafb;
+  background: rgba(15, 23, 42, 0.02);
 }
 
 .table tr:last-child td {
@@ -408,6 +462,93 @@ textarea {
 
 .muted {
   color: var(--muted);
+}
+
+/* ===== Utilities (reduce inline styles) ===== */
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.stack-sm {
+  gap: 10px;
+}
+
+.stack-xs {
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.row-end {
+  justify-content: flex-end;
+}
+
+.row-gap-8 {
+  gap: 8px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.form-error {
+  min-height: 18px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.state-text {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.state-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.px-16 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.modal-form-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.patient-card-title {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.patient-card-value {
+  font-size: 15px;
 }
 
 /* Страница авторизации */
@@ -419,7 +560,7 @@ textarea {
 }
 
 .auth-left {
-  background: #ffffff;
+  background: var(--surface);
   display: grid;
   place-items: center;
   padding: 28px;
@@ -427,6 +568,7 @@ textarea {
 
 .auth-panel {
   width: min(400px, 100%);
+  padding: 22px;
 }
 
 .auth-topbar {
@@ -436,21 +578,21 @@ textarea {
 }
 
 .auth-brand {
-  font-weight: 900;
+  font-weight: 800;
   color: var(--primary);
   font-size: 22px;
   letter-spacing: 0.2px;
 }
 
 .auth-title {
-  font-size: 25px;
-  font-weight: 900;
+  font-size: 22px;
+  font-weight: 800;
   margin: 0 0 6px;
 }
 
 .auth-form {
   display: grid;
-  gap: 5px;
+  gap: 10px;
 }
 
 .auth-label {
@@ -462,7 +604,7 @@ textarea {
 
 .auth-error {
   min-height: 18px;
-  color: #b91c1c;
+  color: var(--danger);
   font-size: 13px;
 }
 
@@ -477,6 +619,19 @@ textarea {
   background-image: url("/assets/images/imgauth.jpeg");
   background-size: cover;
   background-position: center;
+}
+
+.auth-right::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      800px 400px at 30% 20%,
+      rgba(37, 99, 235, 0.35),
+      transparent 55%
+    ),
+    linear-gradient(180deg, rgba(11, 18, 32, 0.15), rgba(11, 18, 32, 0.45));
 }
 
 /* Модальное окно */
@@ -495,7 +650,7 @@ textarea {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -506,7 +661,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #fbfdff;
+  background: var(--surface-2);
 }
 
 .modal-title {
@@ -536,7 +691,7 @@ textarea {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid #c7d2fe;
+  border: 2px solid rgba(37, 99, 235, 0.22);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -564,12 +719,13 @@ textarea {
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: #ffffff;
+  background: var(--surface);
   font-size: 14px;
 }
 
 .schedule-controls select:focus {
   border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus);
   outline: none;
 }
 
@@ -610,20 +766,24 @@ textarea {
   padding: 10px;
   border: 2px solid var(--border);
   border-radius: var(--radius);
-  background: #ffffff;
+  background: var(--surface);
   cursor: pointer;
   text-align: center;
   font-weight: 500;
-  transition: all 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease;
 }
 
 .payment-method:hover {
-  border-color: #d1d5db;
+  border-color: var(--border-strong);
 }
 
 .payment-method.selected {
   border-color: var(--primary);
-  background: #eff6ff;
+  background: rgba(37, 99, 235, 0.1);
   color: var(--primary);
 }
 
@@ -797,12 +957,66 @@ textarea {
     box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
   }
 
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    z-index: 900;
+    display: none;
+  }
+
+  .sidebar-backdrop.show {
+    display: block;
+  }
+
   .auth-split {
     grid-template-columns: 1fr;
   }
 
   .auth-right {
     display: none;
+  }
+  .auth-title {
+    font-size: 18px;
+  }
+}
+
+.burger-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.burger-btn:hover {
+  background: var(--hover);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .burger-btn {
+    display: inline-flex;
+  }
+
+  .header input {
+    width: 100%;
   }
 }
 
@@ -815,7 +1029,7 @@ textarea {
   gap: 0; /* ✅ ең маңызды */
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0; /* ✅ radius жоқ */
+  border-radius: 0;
   overflow: hidden; /* ✅ бұрыштар/шекара таза */
 }
 
@@ -823,11 +1037,15 @@ textarea {
 .schedule-left {
   border-right: 1px solid var(--border);
   background: var(--surface);
+  min-width: 0;
+  min-height: 0;
 }
 
 /* Оң жақ панель */
 .schedule-right {
   background: var(--surface);
+  min-width: 0;
+  min-height: 0;
 }
 
 .schedule-shell .card {
@@ -840,7 +1058,9 @@ textarea {
 /* Сол жақта card-тар бір-біріне жабысып, тек сызықпен бөлінсін */
 .schedule-left .card {
   margin: 0 !important;
-  background-color: #f7f7f7; /* ✅ inline margin-top:12px болса да жояды */
+  background-color: var(
+    --surface-2
+  ); /* ✅ inline margin-top:12px болса да жояды */
 }
 
 .schedule-left .card + .card {
@@ -849,7 +1069,7 @@ textarea {
 
 /* ===== Calendar (MacDent-like FINAL) ===== */
 .cal {
-  background: transparent;
+  background: var(--surface);
   padding: 10px;
 }
 
@@ -858,12 +1078,13 @@ textarea {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0px;
+  background: var(--surface);
 }
 
 .cal__title {
   font-weight: 800;
   text-transform: capitalize;
-  background-color: #ffffff;
+  background-color: var(--surface);
   padding: 9px 32px;
   border: none;
 }
@@ -872,7 +1093,7 @@ textarea {
   width: 40px;
   height: 40px;
   border: none;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
 }
 
@@ -886,7 +1107,7 @@ textarea {
   grid-template-columns: repeat(7, 1fr);
   border: none;
   border-bottom: 0;
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .cal__weekday {
@@ -911,7 +1132,7 @@ textarea {
 
 .cal__day {
   height: 44px;
-  background: #fff;
+  background: var(--surface);
   border: none;
   cursor: pointer;
   font-weight: 600;
@@ -923,8 +1144,8 @@ textarea {
 
 /* басқа ай */
 .cal__day.out {
-  background: #ffffff;
-  color: #9ca3af;
+  background: var(--surface);
+  color: rgba(91, 107, 131, 0.6);
 }
 
 /* hover */
@@ -969,6 +1190,13 @@ textarea {
   }
 }
 
+@media (max-width: 1000px) {
+  .calendar-grid-wrapper {
+    height: 70vh;
+    height: 70dvh;
+  }
+}
+
 .schedule-shell .table {
   border-radius: 0;
   border-left: 0;
@@ -979,11 +1207,14 @@ textarea {
 
 /* Негізгі контейнер */
 .calendar-grid-wrapper {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0;
   overflow: hidden;
-  height: 92vh;
+  --calendar-doctor-col-min: 200px;
+  height: calc(100vh - var(--header-h) - 16px);
+  height: calc(100dvh - var(--header-h) - 16px);
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -992,7 +1223,7 @@ textarea {
 .calendar-grid-header {
   display: flex;
   border-bottom: 1px solid var(--border);
-  background: #fafbfc;
+  background: var(--surface-2);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -1007,7 +1238,10 @@ textarea {
   font-weight: 600;
   color: var(--muted);
   text-align: center;
-  background: #f8fafc;
+  background: var(--surface-2);
+  position: sticky;
+  left: 0;
+  z-index: 30;
 }
 
 /* Врачтардың header-лары */
@@ -1015,15 +1249,22 @@ textarea {
   display: flex;
   flex: 1;
   overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  padding-right: var(--calendar-vscrollbar, 0px);
+}
+
+.calendar-doctors-header::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .calendar-doctor-column-header {
   flex: 1;
-  min-width: 200px;
+  min-width: var(--calendar-doctor-col-min);
   padding: 12px 16px;
   border-right: 1px solid var(--border);
   text-align: center;
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .calendar-doctor-column-header:last-child {
@@ -1048,6 +1289,7 @@ textarea {
   overflow-y: auto;
   overflow-x: auto;
   position: relative;
+  min-height: 0;
 }
 
 /* Grid өзі */
@@ -1061,17 +1303,20 @@ textarea {
 .calendar-time-column {
   width: 80px;
   border-right: 1px solid var(--border);
-  background: #f8fafc;
+  background: var(--surface-2);
   flex-shrink: 0;
+  position: sticky;
+  left: 0;
+  z-index: 20;
 }
 
 .calendar-time-slot {
   height: 60px;
   padding: 8px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--muted);
   text-align: center;
   display: flex;
   align-items: flex-start;
@@ -1087,10 +1332,10 @@ textarea {
 
 .calendar-doctor-column {
   flex: 1;
-  min-width: 200px;
+  min-width: var(--calendar-doctor-col-min);
   border-right: 1px solid var(--border);
   position: relative;
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .calendar-doctor-column:last-child {
@@ -1109,7 +1354,7 @@ textarea {
 
 .calendar-time-grid-line {
   height: 60px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 /* Appointment блоктары */
@@ -1117,8 +1362,8 @@ textarea {
   position: absolute;
   left: 4px;
   right: 4px;
-  border-radius: 6px;
-  padding: 8px;
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
   cursor: pointer;
   transition:
     transform 0.15s ease,
@@ -1129,44 +1374,44 @@ textarea {
 
 .calendar-appointment:hover {
   transform: translateX(2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   z-index: 5;
 }
 
 /* Түстер статус бойынша */
 .calendar-appointment.scheduled {
-  background: #dbeafe;
-  border-left-color: #3b82f6;
+  background: rgba(37, 99, 235, 0.14);
+  border-left-color: rgba(37, 99, 235, 0.95);
 }
 
 .calendar-appointment.arrived {
-  background: #fef3c7;
-  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.18);
+  border-left-color: rgba(245, 158, 11, 0.95);
 }
 
 .calendar-appointment.completed {
-  background: #d1fae5;
-  border-left-color: #10b981;
+  background: rgba(22, 163, 74, 0.16);
+  border-left-color: rgba(22, 163, 74, 0.95);
 }
 
 .calendar-appointment.cancelled {
-  background: #f3f4f6;
-  border-left-color: #9ca3af;
-  opacity: 0.6;
+  background: rgba(91, 107, 131, 0.1);
+  border-left-color: rgba(91, 107, 131, 0.65);
+  opacity: 0.75;
 }
 
 /* Appointment ішіндегі мәліметтер */
 .calendar-appointment-time {
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
+  color: rgba(91, 107, 131, 0.9);
   margin-bottom: 2px;
 }
 
 .calendar-appointment-patient {
   font-size: 13px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -1181,19 +1426,19 @@ textarea {
 }
 
 .calendar-appointment.scheduled .calendar-appointment-status {
-  color: #2563eb;
+  color: rgba(29, 78, 216, 0.95);
 }
 
 .calendar-appointment.arrived .calendar-appointment-status {
-  color: #d97706;
+  color: rgba(180, 83, 9, 0.95);
 }
 
 .calendar-appointment.completed .calendar-appointment-status {
-  color: #059669;
+  color: rgba(22, 163, 74, 0.95);
 }
 
 .calendar-appointment.cancelled .calendar-appointment-status {
-  color: #6b7280;
+  color: rgba(91, 107, 131, 0.9);
 }
 
 /* Пустое состояние */
@@ -1221,28 +1466,28 @@ textarea {
 }
 
 .calendar-grid-scroll::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: rgba(91, 107, 131, 0.1);
 }
 
 .calendar-grid-scroll::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: rgba(91, 107, 131, 0.3);
   border-radius: 4px;
 }
 
 .calendar-grid-scroll::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: rgba(91, 107, 131, 0.44);
 }
 
 /* Адаптивность */
 @media (max-width: 1200px) {
-  .calendar-doctor-column {
-    min-width: 180px;
+  .calendar-grid-wrapper {
+    --calendar-doctor-col-min: 180px;
   }
 }
 
 @media (max-width: 900px) {
-  .calendar-doctor-column {
-    min-width: 150px;
+  .calendar-grid-wrapper {
+    --calendar-doctor-col-min: 150px;
   }
 
   .calendar-time-header,
@@ -1253,11 +1498,9 @@ textarea {
 
 @media (max-width: 640px) {
   .calendar-grid-wrapper {
-    height: calc(100vh - 200px);
-  }
-
-  .calendar-doctor-column {
-    min-width: 120px;
+    height: 60vh;
+    height: 60dvh;
+    --calendar-doctor-col-min: 120px;
   }
 }
 
@@ -1277,7 +1520,7 @@ textarea {
   padding: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0px;
+  border-radius: 0;
   margin-bottom: 0px;
   box-shadow: var(--shadow-sm);
 }
@@ -1287,14 +1530,18 @@ textarea {
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: #f9fafb;
+  background: var(--surface);
   font-size: 14px;
-  transition: all 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
 .patients-search-input:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: 0 0 0 4px var(--focus);
   outline: none;
 }
 
@@ -1305,17 +1552,31 @@ textarea {
   padding: 10px 16px;
   background: var(--primary);
   color: white;
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
 }
 
 .patients-create-btn:hover {
-  opacity: 0.9;
+  background: var(--primary-700);
+}
+
+.patients-create-btn:active {
+  transform: translateY(1px);
+}
+
+.patients-create-btn:focus-visible {
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.05),
+    0 0 0 4px var(--focus);
 }
 
 .patients-create-btn svg {
@@ -1326,7 +1587,7 @@ textarea {
 .patients-content {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
@@ -1358,7 +1619,7 @@ textarea {
 }
 
 .patient-item:hover {
-  background: #f9fafb;
+  background: var(--hover);
 }
 
 /* Indicator dot */
@@ -1411,19 +1672,26 @@ textarea {
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #f8fafc;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .patient-action-btn:hover {
-  background: #f1f3f5;
-  border-color: #d1d5db;
+  background: var(--hover);
+  border-color: var(--border-strong);
+}
+
+.patient-action-btn:focus-visible {
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
 .patient-action-btn svg {
@@ -1525,14 +1793,18 @@ textarea {
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: #f9fafb;
+  background: var(--surface);
   font-size: 14px;
-  transition: all 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
 .payments-input:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: 0 0 0 4px var(--focus);
   outline: none;
 }
 
@@ -1543,18 +1815,32 @@ textarea {
   padding: 10px 20px;
   background: var(--primary);
   color: white;
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   white-space: nowrap;
   height: fit-content;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
 }
 
 .payments-submit-btn:hover {
-  opacity: 0.9;
+  background: var(--primary-700);
+}
+
+.payments-submit-btn:active {
+  transform: translateY(1px);
+}
+
+.payments-submit-btn:focus-visible {
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.05),
+    0 0 0 4px var(--focus);
 }
 
 .payments-submit-btn:disabled {
@@ -1595,7 +1881,7 @@ textarea {
   display: flex;
   gap: 24px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 
@@ -1642,14 +1928,14 @@ textarea {
 }
 
 .payment-item:hover {
-  background: #f9fafb;
+  background: var(--hover);
 }
 
 /* Indicator dot */
 .payment-indicator {
   width: 8px;
   height: 8px;
-  background: #10b981;
+  background: rgba(22, 163, 74, 0.95);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1702,18 +1988,18 @@ textarea {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  background: #f3f4f6;
-  color: #64748b;
+  background: var(--surface-2);
+  color: var(--muted);
 }
 
 .payment-method-badge.cash {
-  background: #d1fae5;
-  color: #047857;
+  background: rgba(22, 163, 74, 0.14);
+  color: rgba(22, 163, 74, 0.95);
 }
 
 .payment-method-badge.card {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.14);
+  color: rgba(29, 78, 216, 0.95);
 }
 
 /* Responsive */
@@ -1778,7 +2064,7 @@ textarea {
   justify-content: space-between;
   gap: 16px;
   padding: 14px 16px;
-  background: #ffffff;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
@@ -1800,7 +2086,7 @@ textarea {
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  background: #f8fafc;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
@@ -1811,6 +2097,10 @@ textarea {
 
 .visit-back-btn:hover {
   background: var(--hover);
+}
+
+.visit-back-btn:focus-visible {
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
 .visit-title-block {
@@ -1839,7 +2129,7 @@ textarea {
 .visit-section {
   padding: 16px;
   border-bottom: 1px solid var(--border);
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .visit-section-title {
@@ -1856,24 +2146,28 @@ textarea {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: #f9fafb;
+  background: var(--surface);
   font-size: 14px;
   font-family: inherit;
   resize: vertical;
   min-height: 80px;
-  transition: border-color 0.15s;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
   box-sizing: border-box;
 }
 
 .visit-textarea:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: 0 0 0 4px var(--focus);
   outline: none;
 }
 
 .visit-textarea:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: rgba(91, 107, 131, 0.1);
+  color: rgba(91, 107, 131, 0.95);
   cursor: not-allowed;
 }
 
@@ -1882,18 +2176,18 @@ textarea {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  background: #fafbfc;
+  background: var(--surface-2);
   border-top: 1px solid var(--border);
 }
 
 .visit-completed-badge {
   font-size: 13px;
   font-weight: 600;
-  color: #047857;
-  background: #d1fae5;
+  color: rgba(22, 163, 74, 0.95);
+  background: rgba(22, 163, 74, 0.14);
   padding: 8px 16px;
   border-radius: var(--radius-sm);
-  border: 1px solid #a7f3d0;
+  border: 1px solid rgba(22, 163, 74, 0.25);
 }
 
 .visit-empty {
@@ -1941,11 +2235,13 @@ textarea {
   margin-top: 0;
   border: 1px solid var(--border);
   border-top: none;
+  border-radius: 0;
+  overflow: hidden;
 }
 
 .report-stat-card {
   padding: 20px 24px;
-  background: #ffffff;
+  background: var(--surface);
   border-right: 1px solid var(--border);
 }
 
@@ -1969,5 +2265,7 @@ textarea {
 #reportPayments {
   border: 1px solid var(--border);
   border-top: none;
-  background: #ffffff;
+  background: var(--surface);
+  border-radius: 0;
+  overflow: hidden;
 }

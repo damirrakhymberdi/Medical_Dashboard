@@ -28,7 +28,7 @@ export function renderLoading(text = "Загрузка пациентов…") {
   return `
     <div class="patients-empty">
       <div class="spinner"></div>
-      <div style="margin-top:12px; color:var(--muted); font-size:14px;">${text}</div>
+      <div class="state-text">${text}</div>
     </div>
   `;
 }
@@ -36,8 +36,8 @@ export function renderLoading(text = "Загрузка пациентов…") {
 export function renderError(message) {
   return `
     <div class="patients-empty">
-      <div style="font-size:32px; margin-bottom:8px;">⚠️</div>
-      <div style="color:#b91c1c; font-size:14px;">${escapeHtml(message)}</div>
+      <div class="state-icon">⚠️</div>
+      <div class="form-error" style="min-height:auto;">${escapeHtml(message)}</div>
     </div>
   `;
 }
@@ -45,8 +45,8 @@ export function renderError(message) {
 export function renderEmpty() {
   return `
     <div class="patients-empty">
-      <div style="font-size:32px; margin-bottom:8px;">👤</div>
-      <div style="color:var(--muted); font-size:14px;">Пациенты не найдены</div>
+      <div class="state-icon">👤</div>
+      <div class="state-text" style="margin-top:0;">Пациенты не найдены</div>
     </div>
   `;
 }
@@ -94,26 +94,26 @@ export function renderPatientForm({ mode, patient }) {
   const title = mode === "edit" ? "Изменить пациента" : "Создать пациента";
   return `
     <form id="patientForm">
-      <div style="font-size:14px; font-weight:600; margin-bottom:16px;">${title}</div>
+      <div class="modal-form-title">${title}</div>
 
-      <label style="display:grid; gap:6px; margin-bottom:12px;">
-        <span style="font-size:12px; color:var(--muted); font-weight:500;">Имя</span>
+      <label class="field" style="margin-bottom:12px;">
+        <span class="field-label">Имя</span>
         <input class="input" name="name" value="${patient?.name ? escapeAttr(patient.name) : ""}" required />
       </label>
 
-      <label style="display:grid; gap:6px; margin-bottom:12px;">
-        <span style="font-size:12px; color:var(--muted); font-weight:500;">Телефон</span>
+      <label class="field" style="margin-bottom:12px;">
+        <span class="field-label">Телефон</span>
         <input class="input" name="phone" value="${patient?.phone ? escapeAttr(patient.phone) : ""}" placeholder="8700..." required />
       </label>
 
-      <label style="display:grid; gap:6px; margin-bottom:12px;">
-        <span style="font-size:12px; color:var(--muted); font-weight:500;">Дата рождения</span>
+      <label class="field" style="margin-bottom:12px;">
+        <span class="field-label">Дата рождения</span>
         <input class="input" type="date" name="birthDate" value="${patient?.birthDate ? escapeAttr(patient.birthDate) : ""}" />
       </label>
 
-      <div id="patientFormError" style="min-height:18px; color:#b91c1c; font-size:13px;"></div>
+      <div id="patientFormError" class="form-error"></div>
 
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+      <div class="form-actions">
         <button class="btn btn-secondary" type="button" id="cancelPatientForm">Отмена</button>
         <button class="btn" type="submit" id="savePatientBtn">${mode === "edit" ? "Сохранить" : "Создать"}</button>
       </div>
@@ -123,18 +123,18 @@ export function renderPatientForm({ mode, patient }) {
 
 export function renderPatientCard(patient) {
   return `
-    <div style="display:grid; gap:16px;">
+    <div class="stack">
       <div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Имя</div>
-        <div style="font-weight:700; font-size:18px;">${escapeHtml(patient.name)}</div>
+        <div class="field-label" style="margin-bottom:4px;">Имя</div>
+        <div class="patient-card-title">${escapeHtml(patient.name)}</div>
       </div>
       <div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Телефон</div>
-        <div style="font-size:15px;">${escapeHtml(patient.phone)}</div>
+        <div class="field-label" style="margin-bottom:4px;">Телефон</div>
+        <div class="patient-card-value">${escapeHtml(patient.phone)}</div>
       </div>
       <div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Дата рождения</div>
-        <div style="font-size:15px;">${patient.birthDate ? escapeHtml(patient.birthDate) : `<span style="color:var(--muted);">—</span>`}</div>
+        <div class="field-label" style="margin-bottom:4px;">Дата рождения</div>
+        <div class="patient-card-value">${patient.birthDate ? escapeHtml(patient.birthDate) : `<span class="muted">—</span>`}</div>
       </div>
     </div>
   `;

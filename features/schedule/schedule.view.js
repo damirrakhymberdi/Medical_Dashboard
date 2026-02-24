@@ -33,26 +33,28 @@ export function renderScheduleLayout({
   selectedDate,
 }) {
   const html = `
-    <div class="schedule-shell" style="margin-top:0px;">
+    <div class="schedule-shell">
       <div class="schedule-left">
         <div class="card">
-          <label class="muted" style="font-size:12px;">Врач</label>
-          <select id="doctorSelect" class="input" style="margin-top:6px;">
-            <option value="">Все врачи</option>
-            ${doctors
-              .map(
-                (d) =>
-                  `<option value="${d.id}" ${d.id === selectedDoctorId ? "selected" : ""}>${escapeHtml(d.name)}</option>`,
-              )
-              .join("")}
-          </select>
+          <label class="field">
+            <span class="field-label">Врач</span>
+            <select id="doctorSelect" class="input">
+              <option value="">Все врачи</option>
+              ${doctors
+                .map(
+                  (d) =>
+                    `<option value="${d.id}" ${d.id === selectedDoctorId ? "selected" : ""}>${escapeHtml(d.name)}</option>`,
+                )
+                .join("")}
+            </select>
+          </label>
         </div>
-        <div class="card" style="margin-top:0;">
+        <div class="card">
           <div id="calendar"></div>
         </div>
         <!-- ✅ ЖАҢА кнопка -->
-        <div class="card" style="margin-top:0; padding:10px;">
-          <button id="addAppointmentBtn" class="btn" style="width:100%;" type="button">
+        <div class="card">
+          <button id="addAppointmentBtn" class="btn btn-block" type="button">
             + Новая запись
           </button>
         </div>
@@ -82,31 +84,31 @@ export function renderScheduleLayout({
 // ✅ ЖАҢА — форма
 export function renderAddAppointmentForm({ doctors, patients }) {
   return `
-    <form id="addApptForm" style="display:grid; gap:12px;">
-      <label style="display:grid; gap:6px; font-size:12px; color:var(--muted);">
-        Врач
+    <form id="addApptForm" class="stack">
+      <label class="field">
+        <span class="field-label">Врач</span>
         <select class="input" name="doctorId" required>
           <option value="">Выберите врача</option>
           ${doctors.map((d) => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join("")}
         </select>
       </label>
-      <label style="display:grid; gap:6px; font-size:12px; color:var(--muted);">
-        Пациент
+      <label class="field">
+        <span class="field-label">Пациент</span>
         <select class="input" name="patientId" required>
           <option value="">Выберите пациента</option>
           ${patients.map((p) => `<option value="${p.id}">${escapeHtml(p.name)} — ${escapeHtml(p.phone)}</option>`).join("")}
         </select>
       </label>
-      <label style="display:grid; gap:6px; font-size:12px; color:var(--muted);">
-        Дата
+      <label class="field">
+        <span class="field-label">Дата</span>
         <input class="input" type="date" name="date" required />
       </label>
-      <label style="display:grid; gap:6px; font-size:12px; color:var(--muted);">
-        Время
+      <label class="field">
+        <span class="field-label">Время</span>
         <input class="input" type="time" name="time" required />
       </label>
-      <label style="display:grid; gap:6px; font-size:12px; color:var(--muted);">
-        Длительность (мин)
+      <label class="field">
+        <span class="field-label">Длительность (мин)</span>
         <select class="input" name="duration">
           <option value="15">15 мин</option>
           <option value="30" selected>30 мин</option>
@@ -115,8 +117,8 @@ export function renderAddAppointmentForm({ doctors, patients }) {
           <option value="90">90 мин</option>
         </select>
       </label>
-      <div id="apptFormError" style="min-height:18px; color:#b91c1c; font-size:13px;"></div>
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <div id="apptFormError" class="form-error"></div>
+      <div class="row row-end row-gap-8">
         <button class="btn btn-secondary" type="button" id="cancelApptForm">Отмена</button>
         <button class="btn" type="submit" id="saveApptBtn">Создать</button>
       </div>

@@ -15,6 +15,8 @@ import {
   renderEmpty,
 } from "./schedule.view.js";
 
+const CAL_GUTTER_RO = Symbol("calendarGutterResizeObserver");
+
 export async function mountSchedulePage() {
   const page = document.getElementById("page-content");
   try {
@@ -81,9 +83,53 @@ async function loadCalendarGrid() {
       appointments: all,
       selectedDate,
     });
+    syncCalendarHorizontalScroll(box);
   } catch (err) {
     box.innerHTML = renderError(err?.message || "Не удалось загрузить данные");
   }
+}
+
+function syncCalendarHorizontalScroll(scopeEl) {
+  const gridScroll = scopeEl.querySelector(".calendar-grid-scroll");
+  const doctorsHeader = scopeEl.querySelector(".calendar-doctors-header");
+  if (!gridScroll || !doctorsHeader) return;
+  if (gridScroll.dataset.scrollSync === "1") return;
+  gridScroll.dataset.scrollSync = "1";
+
+  const updateGutter = () => {
+    const w = gridScroll.offsetWidth - gridScroll.clientWidth;
+    gridScroll
+      .closest(".calendar-grid-wrapper")
+      ?.style.setProperty("--calendar-vscrollbar", `${w}px`);
+  };
+  updateGutter();
+  requestAnimationFrame(updateGutter);
+  requestAnimationFrame(updateGutter);
+  if (typeof ResizeObserver !== "undefined" && !gridScroll[CAL_GUTTER_RO]) {
+    const ro = new ResizeObserver(() => updateGutter());
+    ro.observe(gridScroll);
+    gridScroll[CAL_GUTTER_RO] = ro;
+  }
+
+  let syncing = false;
+  const sync = (from, to) => {
+    if (syncing) return;
+    syncing = true;
+    to.scrollLeft = from.scrollLeft;
+    queueMicrotask(() => {
+      syncing = false;
+    });
+  };
+
+  gridScroll.addEventListener("scroll", () => sync(gridScroll, doctorsHeader), {
+    passive: true,
+  });
+  doctorsHeader.addEventListener("scroll", () => sync(doctorsHeader, gridScroll), {
+    passive: true,
+  });
+
+  // initial alignment (e.g. after re-render)
+  doctorsHeader.scrollLeft = gridScroll.scrollLeft;
 }
 
 async function openAddAppointmentModal() {

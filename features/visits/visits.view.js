@@ -28,7 +28,7 @@ export function renderVisitLoading(text = "Загрузка…") {
   return `
     <div class="visit-empty">
       <div class="spinner"></div>
-      <div style="margin-top:12px; color:var(--muted); font-size:14px;">${escapeHtml(text)}</div>
+      <div class="state-text">${escapeHtml(text)}</div>
     </div>
   `;
 }
@@ -36,8 +36,8 @@ export function renderVisitLoading(text = "Загрузка…") {
 export function renderVisitError(message) {
   return `
     <div class="visit-empty">
-      <div style="font-size:32px; margin-bottom:8px;">⚠️</div>
-      <div style="color:#b91c1c; font-size:14px;">${escapeHtml(message)}</div>
+      <div class="state-icon">⚠️</div>
+      <div class="form-error" style="min-height:auto;">${escapeHtml(message)}</div>
     </div>
   `;
 }
@@ -68,7 +68,6 @@ export function renderVisitForm({ appointment, visit, isFinal }) {
           id="startVisitBtn"
           type="button"
           ${visit ? "disabled" : ""}
-          style="${visit ? "opacity:0.5;" : ""}"
         >
           ${visit ? "Визит начат" : "▶ Начать визит"}
         </button>
@@ -111,13 +110,13 @@ export function renderVisitForm({ appointment, visit, isFinal }) {
         >${escapeHtml(visit?.notes || "")}</textarea>
       </div>
 
-      <div id="visitError" style="min-height:18px; color:#b91c1c; font-size:13px; padding:0 16px;"></div>
+      <div id="visitError" class="form-error px-16"></div>
 
       <div class="visit-footer">
         ${
           isFinal
             ? `<div class="visit-completed-badge">✅ Визит завершён и заблокирован</div>`
-            : `<button class="btn" id="finishVisitBtn" type="submit" ${!visit ? "disabled" : ""} style="${!visit ? "opacity:0.4;cursor:not-allowed;" : ""}">
+            : `<button class="btn" id="finishVisitBtn" type="submit" ${!visit ? "disabled" : ""}>
                Завершить визит
              </button>`
         }

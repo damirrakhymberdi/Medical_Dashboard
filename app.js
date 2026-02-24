@@ -70,10 +70,20 @@ function renderLayout() {
           </a>
         </nav>
       </aside>
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
       <div class="main">
         <header class="header">
-          <input id="globalSearch" type="text" placeholder="Поиск пациента..." />
-          <div style="display:flex; align-items:center; gap:10px;">
+          <div class="header-left">
+            <button class="burger-btn" id="sidebarToggle" type="button" aria-label="Открыть меню">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+              </svg>
+            </button>
+            <input id="globalSearch" type="text" placeholder="Поиск пациента..." />
+          </div>
+          <div class="header-right">
             <div class="user" id="userBox">Гость</div>
             <button class="btn btn-secondary" id="logoutBtn" type="button">Выйти</button>
           </div>
@@ -82,6 +92,39 @@ function renderLayout() {
       </div>
     </div>
   `;
+}
+
+function mountSidebarToggle() {
+  const sidebar = document.querySelector(".sidebar");
+  const toggleBtn = document.getElementById("sidebarToggle");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  const menu = document.getElementById("menu");
+  if (!sidebar || !toggleBtn || !backdrop) return;
+
+  const close = () => {
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+  };
+
+  const toggle = () => {
+    const next = !sidebar.classList.contains("open");
+    sidebar.classList.toggle("open", next);
+    backdrop.classList.toggle("show", next);
+  };
+
+  toggleBtn.addEventListener("click", toggle);
+  backdrop.addEventListener("click", close);
+  menu?.addEventListener("click", (e) => {
+    if (e.target.closest(".menu-item")) close();
+  });
+  if (!window.__sidebarEscBound) {
+    window.__sidebarEscBound = true;
+    window.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      document.querySelector(".sidebar")?.classList.remove("open");
+      document.getElementById("sidebarBackdrop")?.classList.remove("show");
+    });
+  }
 }
 
 function setActiveMenu(route) {
@@ -174,6 +217,7 @@ function renderProtected(route) {
   setHeaderUser();
   applyRoleToMenu();
   setActiveMenu(route);
+  mountSidebarToggle();
   mountGlobalSearch();
   document.getElementById("logoutBtn")?.addEventListener("click", () => {
     setState({ user: null });

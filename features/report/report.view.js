@@ -45,7 +45,7 @@ export function renderLoading(text = "Загрузка…") {
   return `
     <div class="payments-empty" style="margin-top:16px;">
       <div class="spinner"></div>
-      <div style="margin-top:12px; color:var(--muted); font-size:14px;">${escapeHtml(text)}</div>
+      <div class="state-text">${escapeHtml(text)}</div>
     </div>
   `;
 }
@@ -53,8 +53,8 @@ export function renderLoading(text = "Загрузка…") {
 export function renderError(message) {
   return `
     <div class="payments-empty" style="margin-top:16px;">
-      <div style="font-size:32px; margin-bottom:8px;">⚠️</div>
-      <div style="color:#b91c1c; font-size:14px;">${escapeHtml(message)}</div>
+      <div class="state-icon">⚠️</div>
+      <div class="form-error" style="min-height:auto;">${escapeHtml(message)}</div>
     </div>
   `;
 }
@@ -77,8 +77,8 @@ export function renderSummary({ totalAmount, visitsCompleted }) {
 export function renderEmptyPayments() {
   return `
     <div class="payments-empty" style="margin-top:0;">
-      <div style="font-size:32px; margin-bottom:8px;">💰</div>
-      <div style="color:var(--muted); font-size:14px;">Нет оплат за эту дату</div>
+      <div class="state-icon">💰</div>
+      <div class="state-text" style="margin-top:0;">Нет оплат за эту дату</div>
     </div>
   `;
 }
