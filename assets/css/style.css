@@ -620,7 +620,7 @@ textarea {
 
 .auth-right {
   position: relative;
-  background-image: url("./assets/images/imgback.jpg");
+  background-image: url("../assets/images/imgback.jpg");
   background-size: cover;
   background-position: center;
 }
@@ -1312,8 +1312,6 @@ textarea {
   position: relative;
   min-height: 0;
 }
-
-
 
 /* Grid өзі */
 .calendar-grid-body {
