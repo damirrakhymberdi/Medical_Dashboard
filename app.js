@@ -16,10 +16,12 @@ function renderLayout() {
         <div class="sidebar-header">
           <div class="logo">
             <div class="logo-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="#3b82f6"/>
-                <path d="M8 12h8M12 8v8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
+              <img
+                src="./assets/images/Medimetricslogotype.png"
+                alt="MediMetrics logo"
+                width="32"
+                height="32"
+              />
             </div>
             <span class="logo-text">MediMetrics</span>
           </div>

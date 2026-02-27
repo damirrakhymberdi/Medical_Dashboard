@@ -136,6 +136,10 @@ textarea {
   display: block;
 }
 
+.logo-icon img {
+  display: block;
+}
+
 .logo-text {
   font-size: 18px;
   font-weight: 700;
@@ -1211,7 +1215,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 0;
   overflow: hidden;
-  --calendar-doctor-col-min: 200px;
+  --calendar-doctor-col-min: 140px;
   height: calc(100vh - var(--header-h) - 16px);
   height: calc(100dvh - var(--header-h) - 16px);
   min-height: 0;
@@ -1248,9 +1252,9 @@ textarea {
 .calendar-doctors-header {
   display: flex;
   flex: 1;
-  overflow-x: auto;
+  overflow: visible;
   scrollbar-width: none; /* Firefox */
-  padding-right: var(--calendar-vscrollbar, 0px);
+  will-change: transform;
 }
 
 .calendar-doctors-header::-webkit-scrollbar {
@@ -1258,10 +1262,27 @@ textarea {
   height: 0;
 }
 
+.calendar-xscroll {
+  min-width: 0;
+}
+
+.calendar-xscroll--header {
+  flex: 1;
+  overflow-x: hidden; /* lock user scroll, move via JS */
+  overflow-y: hidden;
+  padding-right: var(--calendar-vscrollbar, 0px);
+  scrollbar-width: none; /* Firefox */
+}
+
+.calendar-xscroll--header::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .calendar-doctor-column-header {
   flex: 1;
   min-width: var(--calendar-doctor-col-min);
-  padding: 12px 16px;
+  padding: 8px 16px;
   border-right: 1px solid var(--border);
   text-align: center;
   background: var(--surface);
@@ -1287,16 +1308,18 @@ textarea {
 .calendar-grid-scroll {
   flex: 1;
   overflow-y: auto;
-  overflow-x: auto;
+  overflow-x: hidden;
   position: relative;
   min-height: 0;
 }
 
+
+
 /* Grid өзі */
-.calendar-grid {
+.calendar-grid-body {
   display: flex;
   min-height: 100%;
-  position: relative;
+  align-items: stretch;
 }
 
 /* Уақыт бағанасы */
@@ -1305,9 +1328,6 @@ textarea {
   border-right: 1px solid var(--border);
   background: var(--surface-2);
   flex-shrink: 0;
-  position: sticky;
-  left: 0;
-  z-index: 20;
 }
 
 .calendar-time-slot {
@@ -1328,6 +1348,16 @@ textarea {
   display: flex;
   flex: 1;
   position: relative;
+  height: 100%;
+}
+
+.calendar-xscroll--grid {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: stretch;
 }
 
 .calendar-doctor-column {
@@ -1336,6 +1366,7 @@ textarea {
   border-right: 1px solid var(--border);
   position: relative;
   background: var(--surface);
+  height: 100%;
 }
 
 .calendar-doctor-column:last-child {
@@ -1360,22 +1391,12 @@ textarea {
 /* Appointment блоктары */
 .calendar-appointment {
   position: absolute;
-  left: 4px;
-  right: 4px;
-  border-radius: var(--radius-xs);
-  padding: 8px 10px;
+  left: 0px;
+  right: 0px;
+  padding: 5px 10px;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
   border-left: 3px solid;
   overflow: hidden;
-}
-
-.calendar-appointment:hover {
-  transform: translateX(2px);
-  box-shadow: var(--shadow-sm);
-  z-index: 5;
 }
 
 /* Түстер статус бойынша */
@@ -1405,14 +1426,14 @@ textarea {
   font-size: 11px;
   font-weight: 600;
   color: rgba(91, 107, 131, 0.9);
-  margin-bottom: 2px;
+  margin-bottom: 0px;
 }
 
 .calendar-appointment-patient {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1481,13 +1502,13 @@ textarea {
 /* Адаптивность */
 @media (max-width: 1200px) {
   .calendar-grid-wrapper {
-    --calendar-doctor-col-min: 180px;
+    --calendar-doctor-col-min: 140px;
   }
 }
 
 @media (max-width: 900px) {
   .calendar-grid-wrapper {
-    --calendar-doctor-col-min: 150px;
+    --calendar-doctor-col-min: 140px;
   }
 
   .calendar-time-header,
@@ -1500,7 +1521,7 @@ textarea {
   .calendar-grid-wrapper {
     height: 60vh;
     height: 60dvh;
-    --calendar-doctor-col-min: 120px;
+    --calendar-doctor-col-min: 110px;
   }
 }
 

@@ -90,46 +90,56 @@ async function loadCalendarGrid() {
 }
 
 function syncCalendarHorizontalScroll(scopeEl) {
-  const gridScroll = scopeEl.querySelector(".calendar-grid-scroll");
-  const doctorsHeader = scopeEl.querySelector(".calendar-doctors-header");
-  if (!gridScroll || !doctorsHeader) return;
-  if (gridScroll.dataset.scrollSync === "1") return;
-  gridScroll.dataset.scrollSync = "1";
+  const yScroll = scopeEl.querySelector('[data-cal-y="1"]');
+  const headerX = scopeEl.querySelector('[data-cal-x="header"]');
+  const gridX = scopeEl.querySelector('[data-cal-x="grid"]');
+  const doctorsHeader = headerX?.querySelector(".calendar-doctors-header");
+  if (!yScroll || !headerX || !gridX) return;
+  if (gridX.dataset.scrollSync === "1") return;
+  gridX.dataset.scrollSync = "1";
 
   const updateGutter = () => {
-    const w = gridScroll.offsetWidth - gridScroll.clientWidth;
-    gridScroll
+    const w = yScroll.offsetWidth - yScroll.clientWidth;
+    yScroll
       .closest(".calendar-grid-wrapper")
       ?.style.setProperty("--calendar-vscrollbar", `${w}px`);
   };
   updateGutter();
   requestAnimationFrame(updateGutter);
   requestAnimationFrame(updateGutter);
-  if (typeof ResizeObserver !== "undefined" && !gridScroll[CAL_GUTTER_RO]) {
+  if (typeof ResizeObserver !== "undefined" && !yScroll[CAL_GUTTER_RO]) {
     const ro = new ResizeObserver(() => updateGutter());
-    ro.observe(gridScroll);
-    gridScroll[CAL_GUTTER_RO] = ro;
+    ro.observe(yScroll);
+    yScroll[CAL_GUTTER_RO] = ro;
   }
 
-  let syncing = false;
-  const sync = (from, to) => {
-    if (syncing) return;
-    syncing = true;
-    to.scrollLeft = from.scrollLeft;
-    queueMicrotask(() => {
-      syncing = false;
-    });
+  const renderHeader = () => {
+    if (!doctorsHeader) return;
+    doctorsHeader.style.transform = `translateX(${-gridX.scrollLeft}px)`;
   };
+  renderHeader();
 
-  gridScroll.addEventListener("scroll", () => sync(gridScroll, doctorsHeader), {
-    passive: true,
-  });
-  doctorsHeader.addEventListener("scroll", () => sync(doctorsHeader, gridScroll), {
-    passive: true,
-  });
+  gridX.addEventListener(
+    "scroll",
+    () => {
+      renderHeader();
+    },
+    { passive: true },
+  );
+
+  // Allow scrolling from header area, but drive the single grid scrollbar
+  headerX.addEventListener(
+    "wheel",
+    (e) => {
+      if (e.deltaX === 0) return;
+      gridX.scrollLeft += e.deltaX;
+      e.preventDefault();
+    },
+    { passive: false },
+  );
 
   // initial alignment (e.g. after re-render)
-  doctorsHeader.scrollLeft = gridScroll.scrollLeft;
+  renderHeader();
 }
 
 async function openAddAppointmentModal() {

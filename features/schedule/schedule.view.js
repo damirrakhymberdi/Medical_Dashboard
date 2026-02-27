@@ -135,57 +135,61 @@ export function renderCalendarGrid({ doctors, appointments, selectedDate }) {
     <div class="calendar-grid-wrapper">
       <div class="calendar-grid-header">
         <div class="calendar-time-header">Время</div>
-        <div class="calendar-doctors-header">
-          ${doctors
-            .map(
-              (d) => `
-            <div class="calendar-doctor-column-header">
-              <div class="calendar-doctor-name">${escapeHtml(d.name)}</div>
-              <div class="calendar-doctor-specialty">${escapeHtml(d.specialty || "")}</div>
-            </div>
-          `,
-            )
-            .join("")}
+        <div class="calendar-xscroll calendar-xscroll--header" data-cal-x="header">
+          <div class="calendar-doctors-header">
+            ${doctors
+              .map(
+                (d) => `
+              <div class="calendar-doctor-column-header">
+                <div class="calendar-doctor-name">${escapeHtml(d.name)}</div>
+                <div class="calendar-doctor-specialty">${escapeHtml(d.specialty || "")}</div>
+              </div>
+            `,
+              )
+              .join("")}
+          </div>
         </div>
       </div>
-      <div class="calendar-grid-scroll">
-        <div class="calendar-grid">
+      <div class="calendar-grid-scroll" data-cal-y="1">
+        <div class="calendar-grid-body">
           <div class="calendar-time-column">
             ${timeSlots.map((t) => `<div class="calendar-time-slot">${t}</div>`).join("")}
           </div>
-          <div class="calendar-doctors-columns">
-            ${doctors
-              .map((doctor) => {
-                const appts = appointments.filter(
-                  (a) => a.doctorId === doctor.id,
-                );
-                return `
-                <div class="calendar-doctor-column">
-                  <div class="calendar-time-grid">
-                    ${timeSlots.map(() => `<div class="calendar-time-grid-line"></div>`).join("")}
+          <div class="calendar-xscroll calendar-xscroll--grid" data-cal-x="grid">
+            <div class="calendar-doctors-columns">
+              ${doctors
+                .map((doctor) => {
+                  const appts = appointments.filter(
+                    (a) => a.doctorId === doctor.id,
+                  );
+                  return `
+                  <div class="calendar-doctor-column">
+                    <div class="calendar-time-grid">
+                      ${timeSlots.map(() => `<div class="calendar-time-grid-line"></div>`).join("")}
+                    </div>
+                    ${appts
+                      .map((appt) => {
+                        const top = timeToY(appt.time);
+                        const height = durationToHeight(appt.duration || 30);
+                        return `
+                        <div
+                          class="calendar-appointment ${escapeHtml(appt.status)}"
+                          style="top:${top}px; height:${height}px;"
+                          data-appointment-id="${escapeHtml(appt.id)}"
+                          onclick="window.handleAppointmentClick('${escapeHtml(appt.id)}')"
+                        >
+                          <div class="calendar-appointment-time">${escapeHtml(appt.time)}</div>
+                          <div class="calendar-appointment-patient">${escapeHtml(appt.patientName)}</div>
+                          <div class="calendar-appointment-status">${escapeHtml(appt.status)}</div>
+                        </div>
+                      `;
+                      })
+                      .join("")}
                   </div>
-                  ${appts
-                    .map((appt) => {
-                      const top = timeToY(appt.time);
-                      const height = durationToHeight(appt.duration || 30);
-                      return `
-                      <div
-                        class="calendar-appointment ${escapeHtml(appt.status)}"
-                        style="top:${top}px; height:${height}px;"
-                        data-appointment-id="${escapeHtml(appt.id)}"
-                        onclick="window.handleAppointmentClick('${escapeHtml(appt.id)}')"
-                      >
-                        <div class="calendar-appointment-time">${escapeHtml(appt.time)}</div>
-                        <div class="calendar-appointment-patient">${escapeHtml(appt.patientName)}</div>
-                        <div class="calendar-appointment-status">${escapeHtml(appt.status)}</div>
-                      </div>
-                    `;
-                    })
-                    .join("")}
-                </div>
-              `;
-              })
-              .join("")}
+                `;
+                })
+                .join("")}
+            </div>
           </div>
         </div>
       </div>
