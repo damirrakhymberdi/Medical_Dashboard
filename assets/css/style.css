@@ -620,22 +620,9 @@ textarea {
 
 .auth-right {
   position: relative;
-  background-image: url("../assets/images/imgback.jpg");
+  background-image: url("/assets/images/imgbag.jpg");
   background-size: cover;
   background-position: center;
-}
-
-.auth-right::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      800px 400px at 30% 20%,
-      rgba(37, 99, 235, 0.35),
-      transparent 55%
-    ),
-    linear-gradient(180deg, rgba(11, 18, 32, 0.15), rgba(11, 18, 32, 0.45));
 }
 
 /* Модальное окно */
