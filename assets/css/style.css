@@ -620,7 +620,7 @@ textarea {
 
 .auth-right {
   position: relative;
-  background-image: url("/assets/images/imgauth.jpeg");
+  background-image: url("/assets/images/imgauth.png");
   background-size: cover;
   background-position: center;
 }
