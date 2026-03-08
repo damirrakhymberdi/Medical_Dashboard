@@ -1956,10 +1956,17 @@ textarea {
   color: var(--muted);
 }
 
+
 .user-role-doctor {
   background: rgba(34, 197, 94, 0.12);
   color: #15803d;
 }
+
+.user-role-assistant {
+  background: rgba(168, 85, 247, 0.12);
+  color: #7c3aed;
+}
+
 
 .user-item-status {
   flex-shrink: 0;

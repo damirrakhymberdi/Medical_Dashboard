@@ -70,7 +70,7 @@ export function renderAiPage({ patientId, patientData, allPatients = [] } = {}) 
       <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 style="font-size: 24px; font-weight: 800; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 28px;">🧠</span> AI Clinical Assistant
+            <img src="/assets/images/Medimetricslogotype.png" alt="MediMetrics" style="width: 40px; height: 40px;"> <span style="font-size: 21px;">AI Clinical Assistant</span>
           </h1>
           <p style="color: var(--muted); margin: 0; font-size: 14px;">Автопротоколирование, МКБ-10 и анализ истории</p>
         </div>

@@ -67,7 +67,7 @@ export async function mountSchedulePage() {
     
     window.handleAppointmentClick = (id, patientId) => {
       const state = getState();
-      if (state.user?.role === "doctor") {
+      if (state.user?.role === "doctor" || state.user?.role === "assistant") {
         window.location.hash = `#ai?patient=${patientId}`;
       } else {
         window.location.hash = `#visit?id=${id}`;

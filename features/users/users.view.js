@@ -9,7 +9,7 @@ function esc(s) {
   return div.innerHTML;
 }
 
-const ROLE_LABELS = { owner: "Владелец", admin: "Админ", doctor: "Врач" };
+const ROLE_LABELS = { owner: "Владелец", admin: "Админ", doctor: "Врач", assistant: "Ассистент" };
 
 export function renderUsersPage() {
   return `
@@ -105,6 +105,7 @@ export function renderUserForm(options = {}) {
               <option value="owner" ${role === "owner" ? "selected" : ""}>Владелец</option>
               <option value="admin" ${role === "admin" ? "selected" : ""}>Админ</option>
               <option value="doctor" ${role === "doctor" ? "selected" : ""}>Врач</option>
+              <option value="assistant" ${role === "assistant" ? "selected" : ""}>Ассистент</option>
             </select>
           </div>
           ${isEdit ? `

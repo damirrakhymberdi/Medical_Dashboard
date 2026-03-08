@@ -257,8 +257,10 @@ export async function login(phone, password) {
     return { role: "doctor", phone: cleanPhone, name: "Врач" };
   if (password === "patient")
     return { role: "patient", phone: cleanPhone, name: "Пациент" };
-    
-  throw new Error("Неверный пароль. Попробуйте: 1234, admin, doctor или patient");
+  if (password === "assistant")
+    return { role: "assistant", phone: cleanPhone, name: "Ассистент" };
+
+  throw new Error("Неверный пароль. Попробуйте: 1234, admin, doctor, assistant или patient");
 }
 
 export async function getDoctors() {
@@ -600,7 +602,7 @@ export async function updateInventoryQuantity(id, delta) {
 }
 
 // ——— Пользователи (staff) ———
-const ROLES = ["owner", "admin", "doctor"];
+const ROLES = ["owner", "admin", "doctor", "assistant"];
 
 export async function getUsers(query = "") {
   await delay(350);

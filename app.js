@@ -191,6 +191,7 @@ function setHeaderUser() {
       role === "owner" ? "Владелец" :
       role === "doctor" ? "Врач" :
       role === "admin" ? "Админ" :
+      role === "assistant" ? "Ассистент" :
       role === "patient" ? "Пациент" : "Гость";
   }
   const logoutBtn = document.getElementById("logoutBtn");
@@ -199,7 +200,7 @@ function setHeaderUser() {
 
 function getAllowedRoutesByRole(role) {
   if (role === "admin") return new Set(["schedule", "patients", "payments"]);
-  if (role === "doctor") return new Set(["ai", "patients", "visit", "schedule"]);
+  if (role === "doctor" || role === "assistant") return new Set(["ai", "patients", "visit", "schedule"]);
   if (role === "patient") return new Set(["patients"]);
   // owner: all + users
   return new Set(["ai", "report", "schedule", "payments", "patients", "visit", "users"]);
@@ -226,7 +227,7 @@ function applyRoleToMenu() {
     ["schedule", "patients", "payments"].forEach((r) =>
       menu.querySelector(`[data-route="${r}"]`)?.classList.remove("hidden")
     );
-  } else if (role === "doctor") {
+  } else if (role === "doctor" || role === "assistant") {
     ["ai", "schedule", "patients"].forEach((r) =>
       menu.querySelector(`[data-route="${r}"]`)?.classList.remove("hidden")
     );
@@ -277,7 +278,7 @@ function requireAuthAndRole(route) {
     !getAllowedRoutesByRole(user.role || "owner").has(route)
   ) {
     const role = user.role || "owner";
-    return role === "owner" ? "report" : role === "admin" ? "schedule" : role === "doctor" ? "ai" : "patients";
+    return role === "owner" ? "report" : role === "admin" ? "schedule" : (role === "doctor" || role === "assistant") ? "ai" : "patients";
   }
   return route;
 }

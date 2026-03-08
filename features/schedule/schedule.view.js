@@ -69,7 +69,7 @@ export function renderScheduleLayout({
             <div id="calendar"></div>
           </div>
           <!-- ✅ ЖАҢА кнопка -->
-          ${getState().user?.role !== "doctor" ? `
+          ${!["doctor", "assistant"].includes(getState().user?.role || "") ? `
           <div class="card">
             <button id="addAppointmentBtn" class="btn btn-block" type="button">
               + Новая запись

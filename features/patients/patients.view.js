@@ -181,7 +181,7 @@ export function renderEmpty() {
 
 export function renderPatientsTable(list) {
   const role = getState?.()?.user?.role || "owner";
-  const showAiBtn = role === "doctor" || role === "owner";
+  const showAiBtn = role === "doctor" || role === "assistant" || role === "owner";
 
   return `
     <div class="patients-list">
@@ -273,7 +273,7 @@ export function renderPatientForm({ mode, patient }) {
 
 export function renderPatientCard(patient) {
   const state = getState ? getState() : null;
-  const isDoctor = state?.user?.role === 'doctor';
+  const isDoctor = state?.user?.role === "doctor" || state?.user?.role === "assistant";
   
   // Создаем уникальный ID для этого экземпляра модалки (чтобы скрипт не путался, если их несколько)
   const uid = Math.random().toString(36).substr(2, 9);

@@ -4,7 +4,8 @@ export function renderAuthPage() {
       <div class="auth-left">
         <div class="auth-topbar">
           <div class="auth-brand" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 24px;">🧠</span> NeuroDent
+            <img src="/assets/images/Medimetricslogotype.png" alt="MediMetrics" style="width: 36px; height: 36px;"> 
+            <span style="font-size: 24px; font-weight: 800;">MediMetrics</span>
           </div>
         </div>
         <div class="auth-panel">
@@ -23,9 +24,10 @@ export function renderAuthPage() {
             <div class="auth-hint" style="line-height: 1.6; margin-top: 16px;">
               <b>Демо-пароли для проверки ролей:</b><br>
               • <code>1234</code> — Владелец (доступ ко всему)<br>
-              • <code>admin</code> — Админ (Расписание, Пациенты)<br>
-              • <code>doctor</code> — Врач (AI, Пациенты)<br>
-              • <code>patient</code> — Пациент (только Пациенты)
+              • <code>admin</code> — Админ (Расписание, Пациенты, Касса)<br>
+              • <code>doctor</code> — Врач (AI, Расписание, Пациенты)<br>
+              • <code>assistant</code> — Ассистент (AI, Расписание, Пациенты)<br>
+              • <code>patient</code> — Пациент (только «Моя медкарта»)
             </div>
           </form>
         </div>
