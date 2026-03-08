@@ -1,10 +1,13 @@
+import { getState } from "../../core/state.js";
 import { initCalendar } from "./calendar.js";
 
 function generateTimeSlots() {
   const slots = [];
-  for (let hour = 8; hour <= 19; hour++) {
+  for (let hour = 8; hour <= 20; hour++) {
     slots.push(`${String(hour).padStart(2, "0")}:00`);
-    slots.push(`${String(hour).padStart(2, "0")}:30`);
+    if (hour !== 20) {
+      slots.push(`${String(hour).padStart(2, "0")}:30`);
+    }
   }
   return slots;
 }
@@ -33,34 +36,113 @@ export function renderScheduleLayout({
   selectedDate,
 }) {
   const html = `
-    <div class="schedule-shell">
-      <div class="schedule-left">
-        <div class="card">
-          <label class="field">
-            <span class="field-label">Врач</span>
-            <select id="doctorSelect" class="input">
-              <option value="">Все врачи</option>
-              ${doctors
-                .map(
-                  (d) =>
-                    `<option value="${d.id}" ${d.id === selectedDoctorId ? "selected" : ""}>${escapeHtml(d.name)}</option>`,
-                )
-                .join("")}
-            </select>
-          </label>
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Вкладки (Call-центр) -->
+      <div style="display: flex; gap: 32px; border-bottom: 1px solid var(--border); padding: 20px 24px 0 24px; background: var(--surface);">
+         <div class="tab-btn active" id="tab-calendar" style="font-weight: 600; font-size: 14px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 12px; margin-bottom: -1px; cursor: pointer; transition: all 0.2s;">
+           📅 Умный календарь
+         </div>
+         <div class="tab-btn" id="tab-chats" style="font-weight: 600; font-size: 14px; color: var(--muted); padding-bottom: 12px; margin-bottom: -1px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;">
+           💬 WhatsApp & Звонки
+           <span style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 10px; font-weight: 700;">3</span>
+         </div>
+      </div>
+
+      <!-- Контент: Календарь -->
+      <div id="tab-content-calendar" class="schedule-shell" style="flex: 1;">
+        <div class="schedule-left">
+          <div class="card">
+            <label class="field">
+              <span class="field-label">Врач</span>
+              <select id="doctorSelect" class="input">
+                <option value="">Все врачи</option>
+                ${doctors
+                  .map(
+                    (d) =>
+                      `<option value="${d.id}" ${d.id === selectedDoctorId ? "selected" : ""}>${escapeHtml(d.name)}</option>`,
+                  )
+                  .join("")}
+              </select>
+            </label>
+          </div>
+          <div class="card">
+            <div id="calendar"></div>
+          </div>
+          <!-- ✅ ЖАҢА кнопка -->
+          ${getState().user?.role !== "doctor" ? `
+          <div class="card">
+            <button id="addAppointmentBtn" class="btn btn-block" type="button">
+              + Новая запись
+            </button>
+          </div>` : ""}
         </div>
-        <div class="card">
-          <div id="calendar"></div>
-        </div>
-        <!-- ✅ ЖАҢА кнопка -->
-        <div class="card">
-          <button id="addAppointmentBtn" class="btn btn-block" type="button">
-            + Новая запись
-          </button>
+        <div class="schedule-right">
+          <div id="scheduleContent"></div>
         </div>
       </div>
-      <div class="schedule-right">
-        <div id="scheduleContent"></div>
+
+      <!-- Контент: Чаты (3-column CRM) -->
+      <div id="tab-content-chats" class="crm-chats-wrap" style="display: none; flex: 1; padding: 20px; background: var(--surface-2);">
+        <div class="crm-chats-grid">
+          <!-- LEFT: Conversations list -->
+          <div class="crm-chat-sidebar">
+            <div class="crm-chat-search-wrap">
+              <input type="text" id="chatSearchInput" class="crm-chat-search-input" placeholder="Поиск пациента..." autocomplete="off" />
+            </div>
+            <div class="crm-chat-list" id="chatListContainer">
+              <div class="crm-chat-list-loading">
+                <div class="spinner" style="margin: 0 auto 12px auto;"></div>
+                Загрузка чатов...
+              </div>
+            </div>
+          </div>
+
+          <!-- MIDDLE: Chat conversation -->
+          <div class="crm-chat-main">
+            <div class="crm-chat-header">
+              <div id="chatHeaderInfo">
+                <div class="crm-chat-header-name">Выберите чат</div>
+                <div class="crm-chat-header-meta">Нажмите на диалог слева</div>
+              </div>
+              <div class="crm-chat-header-actions">
+                <button type="button" id="chatCallBtn" class="btn btn-secondary chat-header-btn" title="Позвонить">📞 Позвонить</button>
+                <button type="button" id="chatScheduleBtn" class="btn btn-secondary chat-header-btn" title="Записать">📅 Записать</button>
+              </div>
+            </div>
+            <div id="chatMessagesArea" class="crm-chat-messages">
+              <div class="crm-chat-date">Сегодня</div>
+              <div class="crm-chat-bubble crm-chat-bubble-in">
+                <div class="crm-chat-bubble-text">Здравствуйте! Можно записаться на завтра к хирургу?</div>
+                <div class="crm-chat-bubble-time">10:42</div>
+              </div>
+              <div class="crm-chat-bubble crm-chat-bubble-out">
+                <div class="crm-chat-bubble-text">Добрый день! Да, конечно. У доктора Омарова есть окошко на 14:30. Записать вас?</div>
+                <div class="crm-chat-bubble-time">10:45 ✓✓</div>
+              </div>
+            </div>
+            <div class="crm-chat-input-wrap">
+              <div class="crm-chat-input-actions">
+                <button type="button" class="crm-chat-quick-btn" id="aiReplyBtn">✨ AI-Ответ</button>
+                <button type="button" class="crm-chat-quick-btn" id="chatTemplatePriceBtn">Шаблон: Прайс</button>
+              </div>
+              <div class="crm-chat-input-row">
+                <button type="button" id="chatAttachBtn" class="crm-chat-attach-btn" title="Вложение">📎</button>
+                <input type="text" id="chatInputMsg" class="crm-chat-input" placeholder="Введите сообщение..." autocomplete="off" />
+                <button type="button" id="chatSendBtn" class="crm-chat-send-btn">Отправить</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Patient information panel -->
+          <div class="crm-chat-patient-panel">
+            <div id="chatPatientPanel" class="crm-patient-panel-content">
+              <div class="crm-patient-panel-empty">
+                <div class="crm-patient-panel-empty-icon">👤</div>
+                <p>Выберите чат слева, чтобы увидеть карточку пациента</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -176,7 +258,7 @@ export function renderCalendarGrid({ doctors, appointments, selectedDate }) {
                           class="calendar-appointment ${escapeHtml(appt.status)}"
                           style="top:${top}px; height:${height}px;"
                           data-appointment-id="${escapeHtml(appt.id)}"
-                          onclick="window.handleAppointmentClick('${escapeHtml(appt.id)}')"
+                          onclick="window.handleAppointmentClick('${escapeHtml(appt.id)}', '${escapeHtml(appt.patientId)}')"
                         >
                           <div class="calendar-appointment-time">${escapeHtml(appt.time)}</div>
                           <div class="calendar-appointment-patient">${escapeHtml(appt.patientName)}</div>

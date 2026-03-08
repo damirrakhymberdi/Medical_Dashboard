@@ -22,10 +22,40 @@ export function mountPatientsPage() {
   const page = document.getElementById("page-content");
   page.innerHTML = renderPatientsPage();
 
+  const { user } = getState();
+  if (user?.role === "patient") {
+    // Add logic for patient personal cabinet
+    const downloadBtn = document.getElementById("downloadAiProtocolBtn");
+    if (downloadBtn) {
+      downloadBtn.addEventListener("click", () => {
+        downloadBtn.innerHTML = '<div class="spinner" style="width: 12px; height: 12px; border-width: 2px; border-color: var(--primary); border-right-color: transparent;"></div> Скачивание...';
+        setTimeout(() => {
+          downloadBtn.innerHTML = '✅ Сохранено';
+          downloadBtn.style.color = 'var(--success)';
+          downloadBtn.style.borderColor = 'var(--success)';
+          
+          // Имитация скачивания
+          const link = document.createElement('a');
+          link.href = 'data:text/plain;charset=utf-8,Тестовый AI протокол';
+          link.download = 'AI_Protocol_Damir.pdf';
+          link.click();
+          
+          setTimeout(() => {
+            downloadBtn.innerHTML = '📄 Скачать AI-Протокол (eGov)';
+            downloadBtn.style.color = 'var(--primary)';
+            downloadBtn.style.borderColor = 'var(--primary)';
+          }, 3000);
+        }, 1500);
+      });
+    }
+    return;
+  }
+
   const searchInput = document.getElementById("patientSearch");
   const createBtn = document.getElementById("createPatientBtn");
   const stateBox = document.getElementById("patientsState");
   const tableBox = document.getElementById("patientsTable");
+  if (!searchInput || !stateBox || !tableBox) return;
 
   const hash = window.location.hash || "";
   const q = new URLSearchParams(hash.split("?")[1] || "").get("q") || "";
@@ -38,7 +68,7 @@ export function mountPatientsPage() {
     searchTimer = setTimeout(() => loadPatients(searchInput.value), 250);
   });
 
-  createBtn.addEventListener("click", () => openCreateModal());
+  createBtn?.addEventListener("click", () => openCreateModal());
 
   tableBox.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-action]");
@@ -88,10 +118,14 @@ export function mountPatientsPage() {
         await createPatient({
           name: fd.get("name"),
           phone: fd.get("phone"),
+          email: fd.get("email"),
+          address: fd.get("address"),
           birthDate: fd.get("birthDate"),
         });
         closeModal();
         loadPatients(searchInput.value);
+        // Dispatch custom event so other views could know
+        window.dispatchEvent(new CustomEvent("patients:changed"));
       } catch (err) {
         errBox.textContent = err?.message || "Ошибка создания";
       } finally {
@@ -128,10 +162,14 @@ export function mountPatientsPage() {
           await updatePatient(patientId, {
             name: fd.get("name"),
             phone: fd.get("phone"),
+            email: fd.get("email"),
+            address: fd.get("address"),
             birthDate: fd.get("birthDate"),
           });
           closeModal();
           loadPatients(searchInput.value);
+          // Dispatch custom event
+          window.dispatchEvent(new CustomEvent("patients:changed"));
         } catch (err) {
           errBox.textContent = err?.message || "Ошибка сохранения";
         } finally {

@@ -6,6 +6,9 @@ import { mountPatientsPage } from "./features/patients/patients.controller.js";
 import { mountVisitPage } from "./features/visits/visits.controller.js";
 import { mountPaymentsPage } from "./features/payments/payments.controller.js";
 import { mountReportPage } from "./features/report/report.controller.js";
+import { mountUsersPage } from "./features/users/users.controller.js";
+
+import { mountAiPage } from "./features/ai/ai.controller.js";
 
 const app = document.getElementById("app");
 
@@ -34,30 +37,11 @@ function renderLayout() {
           </div>
         </div>
         <nav class="menu" id="menu">
-          <a href="#schedule" class="menu-item" data-route="schedule">
+          <a href="#ai" class="menu-item" data-route="ai">
             <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
-            <span>Расписание</span>
-            <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </a>
-          <a href="#patients" class="menu-item" data-route="patients">
-            <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span>Пациенты</span>
-            <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </a>
-          <a href="#payments" class="menu-item" data-route="payments">
-            <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-              <line x1="1" y1="10" x2="23" y2="10"/>
-            </svg>
-            <span>Оплаты</span>
+            <span>Core AI Layer</span>
             <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
           <a href="#report" class="menu-item" data-route="report">
@@ -67,7 +51,42 @@ function renderLayout() {
               <line x1="16" y1="13" x2="8" y2="13"/>
               <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
-            <span>Отчёт</span>
+            <span>Business Analytics</span>
+            <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#schedule" class="menu-item" data-route="schedule">
+            <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>Call-центр и CRM</span>
+            <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#payments" class="menu-item" data-route="payments">
+            <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            <span>Финансы и Склад</span>
+            <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#patients" class="menu-item" data-route="patients">
+            <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Пациентский модуль</span>
+            <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#users" class="menu-item hidden" data-route="users">
+            <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Пользователи</span>
             <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         </nav>
@@ -86,6 +105,34 @@ function renderLayout() {
             <input id="globalSearch" type="text" placeholder="Поиск пациента..." />
           </div>
           <div class="header-right">
+            <!-- Notifications (Admin/Owner) -->
+            <div id="notificationsWrap" class="notifications-wrap" style="position: relative; margin-right: 16px; cursor: pointer; display: none;">
+              <div style="font-size: 20px;">🔔</div>
+              <span id="notifBadge" style="position: absolute; top: -4px; right: -6px; background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 10px; font-weight: 700; border: 2px solid var(--surface);">3</span>
+              
+              <!-- Dropdown -->
+              <div id="notifDropdown" style="display: none; position: absolute; top: 100%; right: -10px; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 100; margin-top: 12px;">
+                <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between;">
+                  Автоматизация
+                  <span style="color: var(--primary); font-size: 12px; font-weight: 500; cursor: pointer;">Очистить все</span>
+                </div>
+                <div style="max-height: 300px; overflow-y: auto;">
+                  <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; background: rgba(59, 130, 246, 0.05);">
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">🎂 День рождения</div>
+                    <div style="font-size: 12px; color: var(--muted);">Сегодня у Аружан день рождения. Отправьте поздравительный шаблон с 10% скидкой.</div>
+                  </div>
+                  <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer;">
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; color: #d97706;">⚠️ Нет подтверждения</div>
+                    <div style="font-size: 12px; color: var(--muted);">3 пациента на завтра еще не подтвердили визит. Требуется прозвон.</div>
+                  </div>
+                  <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer;">
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">🦷 Реактивация</div>
+                    <div style="font-size: 12px; color: var(--muted);">У пациента Ерлан прошел год после имплантации. Пора назначить профосмотр.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="user" id="userBox">Гость</div>
             <button class="btn btn-secondary" id="logoutBtn" type="button">Выйти</button>
           </div>
@@ -138,33 +185,59 @@ function setActiveMenu(route) {
 function setHeaderUser() {
   const { user } = getState();
   const userBox = document.getElementById("userBox");
-  if (userBox)
+  if (userBox) {
+    const role = user?.role || "owner";
     userBox.textContent =
-      user?.role === "doctor"
-        ? "Врач"
-        : user?.role === "operator"
-          ? "Оператор"
-          : "Гость";
+      role === "owner" ? "Владелец" :
+      role === "doctor" ? "Врач" :
+      role === "admin" ? "Админ" :
+      role === "patient" ? "Пациент" : "Гость";
+  }
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) logoutBtn.style.display = user ? "inline-flex" : "none";
 }
 
 function getAllowedRoutesByRole(role) {
-  if (role === "doctor") return new Set(["schedule", "visit"]);
-  return new Set(["schedule", "patients", "payments", "report", "visit"]);
+  if (role === "admin") return new Set(["schedule", "patients", "payments"]);
+  if (role === "doctor") return new Set(["ai", "patients", "visit", "schedule"]);
+  if (role === "patient") return new Set(["patients"]);
+  // owner: all + users
+  return new Set(["ai", "report", "schedule", "payments", "patients", "visit", "users"]);
 }
 
 function applyRoleToMenu() {
   const { user } = getState();
   const menu = document.getElementById("menu");
   if (!menu) return;
-  ["patients", "payments", "report"].forEach((r) =>
-    menu.querySelector(`[data-route="${r}"]`)?.classList.remove("hidden"),
+  
+  const role = user?.role || "owner";
+  
+  // Hide all first
+  ["ai", "report", "schedule", "payments", "patients", "users"].forEach((r) =>
+    menu.querySelector(`[data-route="${r}"]`)?.classList.add("hidden")
   );
-  if (user?.role === "doctor") {
-    ["patients", "payments", "report"].forEach((r) =>
-      menu.querySelector(`[data-route="${r}"]`)?.classList.add("hidden"),
+
+  // Show based on role
+  if (role === "owner") {
+    ["ai", "report", "schedule", "payments", "patients", "users"].forEach((r) =>
+      menu.querySelector(`[data-route="${r}"]`)?.classList.remove("hidden")
     );
+  } else if (role === "admin") {
+    ["schedule", "patients", "payments"].forEach((r) =>
+      menu.querySelector(`[data-route="${r}"]`)?.classList.remove("hidden")
+    );
+  } else if (role === "doctor") {
+    ["ai", "schedule", "patients"].forEach((r) =>
+      menu.querySelector(`[data-route="${r}"]`)?.classList.remove("hidden")
+    );
+  } else if (role === "patient") {
+    // Пациент үшін тек бір ғана мәзір қалады, атын "Моя медкарта" деп өзгертеміз
+    const patMenu = menu.querySelector(`[data-route="patients"]`);
+    if (patMenu) {
+       patMenu.classList.remove("hidden");
+       const textSpan = patMenu.querySelector("span");
+       if (textSpan) textSpan.textContent = "Моя медкарта";
+    }
   }
 }
 
@@ -189,19 +262,23 @@ function getRouteFromHash() {
 function requireAuthAndRole(route) {
   const { user } = getState();
   const protectedRoutes = new Set([
+    "ai",
     "schedule",
     "patients",
     "payments",
     "report",
     "visit",
+    "users",
   ]);
   if (!user && protectedRoutes.has(route)) return "login";
   if (
     user &&
     route !== "login" &&
-    !getAllowedRoutesByRole(user.role).has(route)
-  )
-    return "schedule";
+    !getAllowedRoutesByRole(user.role || "owner").has(route)
+  ) {
+    const role = user.role || "owner";
+    return role === "owner" ? "report" : role === "admin" ? "schedule" : role === "doctor" ? "ai" : "patients";
+  }
   return route;
 }
 
@@ -209,8 +286,46 @@ function renderLogin() {
   app.innerHTML = renderAuthPage();
   mountAuthPage({
     onSuccess: () => {
-      window.location.hash = "#schedule";
+      window.location.hash = "#report";
     },
+  });
+}
+
+function mountNotifications() {
+  const wrap = document.getElementById("notificationsWrap");
+  const dropdown = document.getElementById("notifDropdown");
+  const badge = document.getElementById("notifBadge");
+  const { user } = getState();
+
+  if (!wrap) return;
+
+  // Show only for owner or admin
+  const role = user?.role || "owner";
+  if (role === "owner" || role === "admin") {
+    wrap.style.display = "block";
+  } else {
+    wrap.style.display = "none";
+    return;
+  }
+
+  wrap.addEventListener("click", (e) => {
+    if (e.target.closest("#notifDropdown") && !e.target.textContent.includes("Очистить все")) return;
+    
+    if (e.target.textContent === "Очистить все") {
+      const list = dropdown.querySelector("div:nth-child(2)");
+      if (list) list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">Нет новых уведомлений</div>';
+      if (badge) badge.style.display = "none";
+      return;
+    }
+
+    const isVisible = dropdown.style.display === "block";
+    dropdown.style.display = isVisible ? "none" : "block";
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!wrap.contains(e.target)) {
+      dropdown.style.display = "none";
+    }
   });
 }
 
@@ -219,17 +334,31 @@ function renderProtected(route) {
   setHeaderUser();
   applyRoleToMenu();
   setActiveMenu(route);
+
+  // "Поиск пациента" только в Пациентском модуле (и не для роли Пациент)
+  const globalSearchEl = document.getElementById("globalSearch");
+  if (globalSearchEl) {
+    const { user } = getState();
+    const showSearch = route === "patients" && user?.role !== "patient";
+    globalSearchEl.style.display = showSearch ? "block" : "none";
+  }
+
   mountSidebarToggle();
   mountGlobalSearch();
+  mountNotifications();
+
   document.getElementById("logoutBtn")?.addEventListener("click", () => {
     setState({ user: null });
     window.location.hash = "#login";
   });
+  
+  if (route === "ai") return mountAiPage();
   if (route === "schedule") return mountSchedulePage();
   if (route === "patients") return mountPatientsPage();
   if (route === "visit") return mountVisitPage();
   if (route === "payments") return mountPaymentsPage();
   if (route === "report") return mountReportPage();
+  if (route === "users") return mountUsersPage();
 }
 
 function renderRoute() {
@@ -237,13 +366,15 @@ function renderRoute() {
   route = requireAuthAndRole(route);
   const allowed = new Set([
     "login",
+    "ai",
     "schedule",
     "patients",
     "payments",
     "report",
     "visit",
+    "users",
   ]);
-  if (!allowed.has(route)) route = "schedule";
+  if (!allowed.has(route)) route = "report";
   if (route === "login") {
     if (window.location.hash !== "#login") window.location.hash = "#login";
     renderLogin();
