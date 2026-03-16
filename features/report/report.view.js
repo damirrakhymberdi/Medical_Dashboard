@@ -193,9 +193,12 @@ export function renderError(message) {
   `;
 }
 
-export function renderSummary({ totalAmount, visitsCompleted }) {
+export function renderSummary({ totalAmount, visitsCompleted, aiSignals }) {
   // Фейковые данные для красивого отображения (в реальном проекте берутся из API)
   const avgCheck = visitsCompleted ? Math.round(totalAmount / visitsCompleted) : 0;
+  const deepCariesCount = aiSignals?.cariesByType?.deep || 0;
+  const deepStatus =
+    deepCariesCount > 0 ? "Есть случаи" : "Нет случаев";
   
   return `
     <div class="report-summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
@@ -230,10 +233,10 @@ export function renderSummary({ totalAmount, visitsCompleted }) {
       <!-- Маржинальность -->
       <div class="report-summary-card" style="background: var(--surface); border: 1px solid var(--border); padding: 20px; box-shadow: var(--shadow-sm);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-          <div style="font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Маржинальность (AI)</div>
-          <div style="background: var(--surface-2); color: var(--muted); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">Норма</div>
+          <div style="font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Глубокий кариес (AI)</div>
+          <div style="background: var(--surface-2); color: var(--muted); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">${escapeHtml(deepStatus)}</div>
         </div>
-        <div style="font-size: 28px; font-weight: 800; color: var(--text);">42%</div>
+        <div style="font-size: 28px; font-weight: 800; color: var(--text);">${deepCariesCount}</div>
       </div>
 
     </div>

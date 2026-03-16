@@ -26,11 +26,12 @@ export function mountReportPage() {
       summaryBox.innerHTML = "";
       paymentsBox.innerHTML = "";
       const report = await getDayReport(d);
-      setState({ selectedDate: d, payments: report.payments });
+      setState({ selectedDate: d, payments: report.payments, aiSignals: report.aiSignals });
       stateBox.innerHTML = "";
       summaryBox.innerHTML = renderSummary({
         totalAmount: report.totalAmount,
         visitsCompleted: report.visitsCompleted,
+        aiSignals: report.aiSignals,
       });
       if (!report.payments.length) {
         paymentsBox.innerHTML = renderEmptyPayments();

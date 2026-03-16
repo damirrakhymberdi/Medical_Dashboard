@@ -193,10 +193,26 @@ const initialDb = {
       patientId: "p3",
       startedAt: `${shiftDate(TODAY, -1)}T15:00:00`,
       finishedAt: `${shiftDate(TODAY, -1)}T15:25:00`,
+      // Легаси поля (для других модулей)
       complaint: "Зубная боль",
       diagnosis: "Кариес",
       notes: "Рекомендована консультация стоматолога",
       isFinal: true,
+      // Core AI Layer — расширенная модель визита
+      diagnosisCode: "K02.1",
+      cariesType: "deep", // surface | medium | deep | complicated
+      toothNumber: "16",
+      protocol: {
+        complaints: "Боль в верхней челюсти справа при приеме холодной пищи. Ноет со вчерашнего дня.",
+        anamnesis: "Обострение хронического кариеса, ранее лечение не проводилось.",
+        objective: "Глубокая кариозная полость в зубе 1.6, размягченный дентин, зондирование болезненно.",
+        diagnosisText: "Кариес дентина (16)",
+        treatment: "Анестезия Ultracain, препарирование, обработка, пломба Filtek Z250.",
+      },
+      materials: [
+        { code: "ultracain", name: "Ultracain D-S forte 1.7ml", qty: 1, unit: "амп" },
+        { code: "filtek", name: "Filtek Z250 (шприц)", qty: 1, unit: "шт" },
+      ],
     },
   ],
   payments: [
@@ -227,7 +243,7 @@ const initialDb = {
 function getDb() {
   let data;
   if (typeof localStorage !== "undefined") {
-    const saved = localStorage.getItem("medimetrics_db");
+    const saved = localStorage.getItem("neurodent_db");
     data = saved ? JSON.parse(saved) : clone(initialDb);
   } else {
     data = clone(initialDb);
@@ -238,7 +254,7 @@ function getDb() {
 
 function saveDb() {
   if (typeof localStorage !== "undefined") {
-    localStorage.setItem("medimetrics_db", JSON.stringify(db));
+    localStorage.setItem("neurodent_db", JSON.stringify(db));
   }
 }
 
@@ -419,6 +435,22 @@ export async function updatePatient(id, patch) {
   return clone(p);
 }
 
+export async function getActiveAppointmentByPatient(patientId) {
+  await delay();
+  const id = String(patientId || "");
+  if (!id) return null;
+  const candidates = db.appointments
+    .filter(
+      (a) =>
+        a.patientId === id &&
+        a.status !== "cancelled" &&
+        a.status !== "completed",
+    )
+    .sort((a, b) => a.time.localeCompare(b.time));
+  const appt = candidates[0];
+  return appt ? clone(appt) : null;
+}
+
 export async function updateAppointmentStatus(appointmentId, status) {
   await delay(450);
   validateStatus(status);
@@ -476,28 +508,77 @@ export async function finishVisit(appointmentId, visitData) {
   visit.complaint = complaint;
   visit.diagnosis = diagnosis;
   visit.notes = notes;
+  // Расширенные AI-поля (если переданы)
+  if (visitData) {
+    if (visitData.diagnosisCode) {
+      visit.diagnosisCode = String(visitData.diagnosisCode);
+    }
+    if (visitData.cariesType) {
+      visit.cariesType = String(visitData.cariesType);
+    }
+    if (visitData.toothNumber) {
+      visit.toothNumber = String(visitData.toothNumber);
+    }
+    if (visitData.protocol && typeof visitData.protocol === "object") {
+      visit.protocol = {
+        complaints: String(visitData.protocol.complaints || ""),
+        anamnesis: String(visitData.protocol.anamnesis || ""),
+        objective: String(visitData.protocol.objective || ""),
+        diagnosisText: String(visitData.protocol.diagnosisText || ""),
+        treatment: String(visitData.protocol.treatment || ""),
+      };
+    }
+    if (Array.isArray(visitData.materials)) {
+      visit.materials = visitData.materials.map((m) => ({
+        code: String(m.code || ""),
+        name: String(m.name || ""),
+        qty: Number(m.qty) || 0,
+        unit: String(m.unit || ""),
+      }));
+    }
+  }
   visit.isFinal = true;
   visit.finishedAt = new Date().toISOString();
   appt.status = "completed";
 
-  // AI Автосписание со склада
+  // Автосписание со склада
   if (db.inventory) {
-    const textToAnalyze = (notes + " " + diagnosis).toLowerCase();
-    
-    // Простой парсер для демо-целей
-    if (textToAnalyze.includes("имплант") || textToAnalyze.includes("straumann")) {
-      const item = db.inventory.find(i => i.name.toLowerCase().includes("straumann"));
-      if (item && item.quantity > 0) item.quantity -= 1;
-    }
-    
-    if (textToAnalyze.includes("пломб") || textToAnalyze.includes("filtek")) {
-      const item = db.inventory.find(i => i.name.toLowerCase().includes("filtek"));
-      if (item && item.quantity > 0) item.quantity -= 1;
-    }
+    // 1) Если Core AI передал конкретные материалы — используем их
+    if (Array.isArray(visit.materials) && visit.materials.length) {
+      for (const m of visit.materials) {
+        const qty = Number(m.qty) || 0;
+        if (!qty) continue;
+        const code = String(m.code || "").toLowerCase();
+        const name = String(m.name || "").toLowerCase();
+        const item =
+          db.inventory.find((i) =>
+            code ? i.name.toLowerCase().includes(code) : false,
+          ) ||
+          db.inventory.find((i) =>
+            name ? i.name.toLowerCase().includes(name) : false,
+          );
+        if (item && item.quantity > 0) {
+          item.quantity = Math.max(0, item.quantity - qty);
+        }
+      }
+    } else {
+      // 2) Иначе — старый текстовый парсер (для других модулей)
+      const textToAnalyze = (notes + " " + diagnosis).toLowerCase();
+      
+      if (textToAnalyze.includes("имплант") || textToAnalyze.includes("straumann")) {
+        const item = db.inventory.find(i => i.name.toLowerCase().includes("straumann"));
+        if (item && item.quantity > 0) item.quantity -= 1;
+      }
+      
+      if (textToAnalyze.includes("пломб") || textToAnalyze.includes("filtek")) {
+        const item = db.inventory.find(i => i.name.toLowerCase().includes("filtek"));
+        if (item && item.quantity > 0) item.quantity -= 1;
+      }
 
-    if (textToAnalyze.includes("анестези") || textToAnalyze.includes("ultracain")) {
-      const item = db.inventory.find(i => i.name.toLowerCase().includes("ultracain"));
-      if (item && item.quantity > 0) item.quantity -= 1;
+      if (textToAnalyze.includes("анестези") || textToAnalyze.includes("ultracain")) {
+        const item = db.inventory.find(i => i.name.toLowerCase().includes("ultracain"));
+        if (item && item.quantity > 0) item.quantity -= 1;
+      }
     }
   }
 
@@ -547,7 +628,63 @@ export async function getDayReport(date) {
   const visitsCompleted = db.appointments.filter(
     (a) => a.date === date && a.status === "completed",
   ).length;
-  return clone({ date, payments, totalAmount, visitsCompleted });
+  // AI-сигналы по визитам за день
+  const aiSignals = {
+    cariesByType: {
+      surface: 0,
+      medium: 0,
+      deep: 0,
+      complicated: 0,
+    },
+    teethByCount: {}, // { "16": 3, "46": 1, ... }
+  };
+
+  const completedAppts = db.appointments.filter(
+    (a) => a.date === date && a.visitId,
+  );
+  for (const appt of completedAppts) {
+    const v = db.visits.find((x) => x.id === appt.visitId);
+    if (!v) continue;
+    const type = v.cariesType;
+    if (type && aiSignals.cariesByType[type] !== undefined) {
+      aiSignals.cariesByType[type] += 1;
+    }
+    const tooth = v.toothNumber;
+    if (tooth) {
+      aiSignals.teethByCount[tooth] = (aiSignals.teethByCount[tooth] || 0) + 1;
+    }
+  }
+
+  // Оставим только топ-5 зубов по частоте
+  const teethEntries = Object.entries(aiSignals.teethByCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  aiSignals.teethByCount = Object.fromEntries(teethEntries);
+
+  return clone({ date, payments, totalAmount, visitsCompleted, aiSignals });
+}
+
+export async function getVisitsByPatient(patientId) {
+  await delay(500);
+  if (!patientId) throw new Error("Пациент не выбран");
+  const list = db.visits
+    .filter((v) => v.patientId === patientId)
+    .sort((a, b) => {
+      const aTime = a.startedAt || "";
+      const bTime = b.startedAt || "";
+      return bTime.localeCompare(aTime);
+    })
+    .map((v) => ({
+      id: v.id,
+      startedAt: v.startedAt,
+      finishedAt: v.finishedAt,
+      diagnosis: v.diagnosis || v.protocol?.diagnosisText || "",
+      diagnosisCode: v.diagnosisCode || "",
+      cariesType: v.cariesType || "",
+      toothNumber: v.toothNumber || "",
+      isFinal: !!v.isFinal,
+    }));
+  return clone(list);
 }
 
 export async function getInventoryItems() {

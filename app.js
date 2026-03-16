@@ -21,12 +21,12 @@ function renderLayout() {
             <div class="logo-icon">
               <img
                 src="./assets/images/Medimetricslogotype.png"
-                alt="MediMetrics logo"
+                alt="Neurodent logo"
                 width="32"
                 height="32"
               />
             </div>
-            <span class="logo-text">MediMetrics</span>
+            <span class="logo-text">Neurodent</span>
           </div>
           <div class="support-info">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -128,7 +128,7 @@ export function renderScheduleLayout({
               <div class="crm-chat-input-row">
                 <button type="button" id="chatAttachBtn" class="crm-chat-attach-btn" title="Вложение">📎</button>
                 <input type="text" id="chatInputMsg" class="crm-chat-input" placeholder="Введите сообщение..." autocomplete="off" />
-                <button type="button" id="chatSendBtn" class="crm-chat-send-btn">Отправить</button>
+                <button type="button" id="chatSendBtn" class="crm-chat-send-btn">Отправить в WhatsApp</button>
               </div>
             </div>
           </div>
