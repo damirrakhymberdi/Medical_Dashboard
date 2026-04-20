@@ -1,4 +1,3 @@
-// ui/modal.js
 let modalEl = null;
 
 export function openModal({ title = "", content = "", onClose } = {}) {
@@ -10,16 +9,14 @@ export function openModal({ title = "", content = "", onClose } = {}) {
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-header">
         <div class="modal-title">${title}</div>
-        <button class="btn btn-secondary modal-close" type="button" aria-label="Close">✕</button>
+        <button class="btn btn-secondary modal-close" type="button" aria-label="Закрыть">✕</button>
       </div>
       <div class="modal-body">${content}</div>
     </div>
   `;
 
   document.body.appendChild(modalEl);
-
-  const closeBtn = modalEl.querySelector(".modal-close");
-  closeBtn.addEventListener("click", () => {
+  modalEl.querySelector(".modal-close").addEventListener("click", () => {
     closeModal();
     onClose?.();
   });

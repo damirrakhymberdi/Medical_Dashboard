@@ -1,67 +1,85 @@
-// core/api.js
-// Mock backend (in-memory DB) with delay + random errors.
-// Later you can replace internals with real fetch() calls without touching UI logic.
+// Initialize default DB if needed and setup clone
+const clone = (data) => JSON.parse(JSON.stringify(data));
 
-const TODAY = new Date().toISOString().slice(0, 10); // e.g. "2026-02-16" (depends on user's system time)
+const TODAY = new Date().toISOString().slice(0, 10);
 
-// ---------- helpers ----------
 function delay(ms = 600) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
-function maybeFail(chance = 0.1) {
-  if (Math.random() < chance)
-    throw new Error("Network error. Please try again.");
-}
+function maybeFail() {}
 
-function clone(data) {
-  // prevents UI from mutating "DB" objects accidentally
-  return structuredClone
-    ? structuredClone(data)
-    : JSON.parse(JSON.stringify(data));
-}
+// Remove redundant clone function since we defined it at top
+// function clone(data) {
+//   return structuredClone
+//     ? structuredClone(data)
+//     : JSON.parse(JSON.stringify(data));
+// }
 
 function genId(prefix = "id") {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 }
 
-// ---------- "DB" ----------
-const db = {
-  doctors: [
-    { id: "d1", name: "Dr. Smith", specialty: "Therapist" },
-    { id: "d2", name: "Dr. Johnson", specialty: "Dentist" },
-    { id: "d3", name: "Dr. Lee", specialty: "Cardiologist" },
-  ],
+function shiftDate(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
+function getPatientName(patientId) {
+  const p = db.patients.find((x) => x.id === patientId);
+  return p ? p.name : "Неизвестно";
+}
+
+function validateStatus(status) {
+  const allowed = new Set(["scheduled", "arrived", "completed", "cancelled"]);
+  if (!allowed.has(status)) throw new Error("Неверный статус записи");
+}
+
+function validatePaymentMethod(method) {
+  const allowed = new Set(["cash", "card"]);
+  if (!allowed.has(method)) throw new Error("Неверный метод оплаты");
+}
+
+const initialDb = {
+  doctors: [
+    { id: "d1", name: "Dr. Smith", specialty: "Терапевт" },
+    { id: "d2", name: "Dr. Johnson", specialty: "Стоматолог" },
+    { id: "d3", name: "Dr. Lee", specialty: "Кардиолог" },
+    { id: "d4", name: "Dr. Nguyen", specialty: "Ортодонт" },
+    { id: "d5", name: "Dr. Garcia", specialty: "Хирург" },
+    { id: "d6", name: "Dr. Patel", specialty: "Педиатр" },
+  ],
   patients: [
     {
       id: "p1",
-      name: "John Doe",
+      name: "Иван Иванов",
       phone: "87001112233",
       birthDate: "2001-04-10",
+      createdAt: "2023-03-02",
     },
     {
       id: "p2",
-      name: "Anna Ivanova",
+      name: "Анна Петрова",
       phone: "87009998877",
       birthDate: "1998-11-05",
+      createdAt: "2023-11-10",
     },
     {
       id: "p3",
-      name: "Damir A.",
+      name: "Дамир Алиев",
       phone: "87005556677",
       birthDate: "2005-02-01",
+      createdAt: "2024-01-15",
     },
   ],
-
-  // Appointments = schedule items
-  // status: scheduled | arrived | completed | cancelled
   appointments: [
     {
       id: "a1",
       doctorId: "d1",
       date: TODAY,
       time: "09:30",
+      duration: 30,
       patientId: "p1",
       status: "scheduled",
       visitId: null,
@@ -71,6 +89,7 @@ const db = {
       doctorId: "d1",
       date: TODAY,
       time: "10:00",
+      duration: 60,
       patientId: "p2",
       status: "arrived",
       visitId: null,
@@ -80,24 +99,92 @@ const db = {
       doctorId: "d2",
       date: TODAY,
       time: "11:30",
+      duration: 45,
       patientId: "p3",
       status: "scheduled",
       visitId: null,
     },
-
-    // yesterday example (for date switching)
+    {
+      id: "a5",
+      doctorId: "d2",
+      date: TODAY,
+      time: "09:00",
+      duration: 30,
+      patientId: "p1",
+      status: "completed",
+      visitId: null,
+    },
+    {
+      id: "a6",
+      doctorId: "d3",
+      date: TODAY,
+      time: "10:30",
+      duration: 90,
+      patientId: "p2",
+      status: "arrived",
+      visitId: null,
+    },
+    {
+      id: "a7",
+      doctorId: "d1",
+      date: TODAY,
+      time: "14:00",
+      duration: 45,
+      patientId: "p3",
+      status: "scheduled",
+      visitId: null,
+    },
+    {
+      id: "a8",
+      doctorId: "d3",
+      date: TODAY,
+      time: "13:00",
+      duration: 60,
+      patientId: "p1",
+      status: "cancelled",
+      visitId: null,
+    },
+    {
+      id: "a9",
+      doctorId: "d4",
+      date: TODAY,
+      time: "08:30",
+      duration: 30,
+      patientId: "p3",
+      status: "scheduled",
+      visitId: null,
+    },
+    {
+      id: "a10",
+      doctorId: "d5",
+      date: TODAY,
+      time: "12:00",
+      duration: 60,
+      patientId: "p1",
+      status: "arrived",
+      visitId: null,
+    },
+    {
+      id: "a11",
+      doctorId: "d6",
+      date: TODAY,
+      time: "09:00",
+      duration: 45,
+      patientId: "p2",
+      status: "completed",
+      visitId: null,
+    },
     {
       id: "a4",
       doctorId: "d1",
       date: shiftDate(TODAY, -1),
       time: "15:00",
+      duration: 30,
       patientId: "p3",
       status: "completed",
       visitId: "v1",
     },
   ],
-
-  // Visits linked to appointmentId
   visits: [
     {
       id: "v1",
@@ -106,14 +193,28 @@ const db = {
       patientId: "p3",
       startedAt: `${shiftDate(TODAY, -1)}T15:00:00`,
       finishedAt: `${shiftDate(TODAY, -1)}T15:25:00`,
-      complaint: "Toothache",
-      diagnosis: "Caries",
-      notes: "Recommended dentist consult",
+      // Легаси поля (для других модулей)
+      complaint: "Зубная боль",
+      diagnosis: "Кариес",
+      notes: "Рекомендована консультация стоматолога",
       isFinal: true,
+      // Core AI Layer — расширенная модель визита
+      diagnosisCode: "K02.1",
+      cariesType: "deep", // surface | medium | deep | complicated
+      toothNumber: "16",
+      protocol: {
+        complaints: "Боль в верхней челюсти справа при приеме холодной пищи. Ноет со вчерашнего дня.",
+        anamnesis: "Обострение хронического кариеса, ранее лечение не проводилось.",
+        objective: "Глубокая кариозная полость в зубе 1.6, размягченный дентин, зондирование болезненно.",
+        diagnosisText: "Кариес дентина (16)",
+        treatment: "Анестезия Ultracain, препарирование, обработка, пломба Filtek Z250.",
+      },
+      materials: [
+        { code: "ultracain", name: "Ultracain D-S forte 1.7ml", qty: 1, unit: "амп" },
+        { code: "filtek", name: "Filtek Z250 (шприц)", qty: 1, unit: "шт" },
+      ],
     },
   ],
-
-  // Payments may link to visitId / patientId
   payments: [
     {
       id: "pay1",
@@ -125,138 +226,191 @@ const db = {
       method: "cash",
     },
   ],
+  inventory: [
+    { id: "inv1", name: "Имплант Straumann BLT", category: "Имплантология", quantity: 15, unit: "шт", minQuantity: 5 },
+    { id: "inv2", name: "Ultracain D-S forte 1.7ml", category: "Анестезия", quantity: 120, unit: "амп", minQuantity: 50 },
+    { id: "inv3", name: "Filtek Z250 (шприц)", category: "Терапия", quantity: 8, unit: "шт", minQuantity: 3 },
+    { id: "inv4", name: "Слепочная масса Speedex", category: "Ортопедия", quantity: 4, unit: "упак", minQuantity: 2 },
+    { id: "inv5", name: "Перчатки смотровые (M)", category: "Расходники", quantity: 45, unit: "упак", minQuantity: 10 },
+  ],
+  users: [
+    { id: "u1", name: "Алексей Владельцев", phone: "87001234567", email: "owner@clinic.kz", role: "owner", isActive: true, createdAt: "2023-01-01" },
+    { id: "u2", name: "Мария Админова", phone: "87007654321", email: "admin@clinic.kz", role: "admin", isActive: true, createdAt: "2023-02-15" },
+    { id: "u3", name: "Дмитрий Врачев", phone: "87005551234", email: "doctor@clinic.kz", role: "doctor", isActive: true, createdAt: "2023-03-10" },
+  ],
 };
 
-// helper to shift ISO date string by N days
-function shiftDate(isoDate, days) {
-  const d = new Date(`${isoDate}T00:00:00`);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+function getDb() {
+  let data;
+  if (typeof localStorage !== "undefined") {
+    const saved = localStorage.getItem("neurodent_db");
+    data = saved ? JSON.parse(saved) : clone(initialDb);
+  } else {
+    data = clone(initialDb);
+  }
+  if (!Array.isArray(data.users)) data.users = clone(initialDb.users);
+  return data;
 }
 
-function getPatientName(patientId) {
-  const p = db.patients.find((x) => x.id === patientId);
-  return p ? p.name : "Unknown";
+function saveDb() {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem("neurodent_db", JSON.stringify(db));
+  }
 }
 
-function validateStatus(status) {
-  const allowed = new Set(["scheduled", "arrived", "completed", "cancelled"]);
-  if (!allowed.has(status)) throw new Error("Invalid appointment status");
-}
+const db = getDb();
 
-function validatePaymentMethod(method) {
-  const allowed = new Set(["cash", "card"]);
-  if (!allowed.has(method)) throw new Error("Invalid payment method");
-}
-
-// ---------- API ----------
-/**
- * AUTH
- */
 export async function login(phone, password) {
   await delay(800);
-  maybeFail(0.1);
-
   const cleanPhone = String(phone || "").replace(/\D/g, "");
-  if (cleanPhone.length < 10) throw new Error("Phone number is invalid");
-
-  // demo rule:
-  // password "1234" -> operator
-  // password "doctor" -> doctor
-  if (password === "1234")
-    return { role: "operator", phone: cleanPhone, name: "Operator" };
+  if (cleanPhone.length < 10) throw new Error("Неверный номер телефона");
+  
+  if (password === "1234" || password === "owner")
+    return { role: "owner", phone: cleanPhone, name: "Владелец" };
+  if (password === "admin")
+    return { role: "admin", phone: cleanPhone, name: "Админ" };
   if (password === "doctor")
-    return { role: "doctor", phone: cleanPhone, name: "Doctor" };
+    return { role: "doctor", phone: cleanPhone, name: "Врач" };
+  if (password === "patient")
+    return { role: "patient", phone: cleanPhone, name: "Пациент" };
+  if (password === "assistant")
+    return { role: "assistant", phone: cleanPhone, name: "Ассистент" };
 
-  throw new Error("Invalid credentials");
+  throw new Error("Неверный пароль. Попробуйте: 1234, admin, doctor, assistant или patient");
 }
 
-/**
- * DOCTORS
- */
 export async function getDoctors() {
   await delay();
-  maybeFail(0.08);
   return clone(db.doctors);
 }
 
-/**
- * SCHEDULE
- * Returns appointments for doctor/date with expanded patientName (handy for UI)
- */
 export async function getSchedule(doctorId, date) {
   await delay();
-  maybeFail(0.12);
-
-  if (!doctorId) throw new Error("Select a doctor");
-  if (!date) throw new Error("Select a date");
-
+  if (!doctorId) throw new Error("Выберите врача");
+  if (!date) throw new Error("Выберите дату");
   const list = db.appointments
     .filter((a) => a.doctorId === doctorId && a.date === date)
     .sort((a, b) => a.time.localeCompare(b.time))
-    .map((a) => ({
-      ...a,
-      patientName: getPatientName(a.patientId),
-    }));
-
+    .map((a) => ({ ...a, patientName: getPatientName(a.patientId) }));
   return clone(list);
 }
 
-/**
- * PATIENTS
- */
+export async function createAppointment(data) {
+  await delay();
+  const doctorId = String(data?.doctorId || "");
+  const patientId = String(data?.patientId || "");
+  const date = String(data?.date || "");
+  const time = String(data?.time || "");
+  const duration = Number(data?.duration) || 30;
+  if (!doctorId) throw new Error("Выберите врача");
+  if (!patientId) throw new Error("Выберите пациента");
+  if (!date) throw new Error("Выберите дату");
+  if (!time) throw new Error("Выберите время");
+  const appt = {
+    id: genId("a"),
+    doctorId,
+    patientId,
+    date,
+    time,
+    duration,
+    status: "scheduled",
+    visitId: null,
+  };
+  db.appointments.push(appt);
+  saveDb();
+  return clone({ ...appt, patientName: getPatientName(patientId) });
+}
+
 export async function searchPatients(query = "") {
   await delay();
-  maybeFail(0.1);
-
   const q = String(query).trim().toLowerCase();
-  const list = db.patients
-    .filter((p) => {
-      if (!q) return true;
-      return p.name.toLowerCase().includes(q) || String(p.phone).includes(q);
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
-
+  
+  // Create an array of patients
+  const patientsArray = Array.isArray(db.patients) ? db.patients : [];
+  
+  const list = patientsArray
+    .filter(
+      (p) =>
+        !q || p.name.toLowerCase().includes(q) || String(p.phone).includes(q),
+    )
+    .sort((a, b) => {
+        // Сортировка по дате регистрации по убыванию (сначала новые)
+        const dateA = new Date(a.createdAt || "2000-01-01");
+        const dateB = new Date(b.createdAt || "2000-01-01");
+        if (dateB > dateA) return 1;
+        if (dateB < dateA) return -1;
+        return a.name.localeCompare(b.name);
+    });
   return clone(list);
 }
 
 export async function getPatientById(id) {
   await delay(350);
-  maybeFail(0.08);
-
   const p = db.patients.find((x) => x.id === id);
-  if (!p) throw new Error("Patient not found");
-  return clone(p);
+  if (!p) throw new Error("Пациент не найден");
+  
+  // Добавляем динамические данные для вкладки "Лечение" и "Визиты" на основе расписания и визитов
+  const patientVisits = db.visits.filter(v => v.patientId === id);
+  const patientAppointments = db.appointments.filter(a => a.patientId === id);
+  
+  const formattedTreatments = patientVisits.map(v => {
+    const doctor = db.doctors.find(d => d.id === v.doctorId);
+    const appt = db.appointments.find(a => a.id === v.appointmentId);
+    return {
+      procedure: v.diagnosis || "Лечение", // Для демо используем диагноз как процедуру
+      diagnosis: v.complaint || "Без диагноза",
+      doctor: doctor ? doctor.name : "Неизвестный врач",
+      date: appt ? appt.date : "Неизвестная дата",
+      cost: "15 000", // Заглушка, можно брать из payments
+      aiSummary: v.notes || "AI резюме не сформировано."
+    };
+  });
+
+  const formattedVisits = patientAppointments.map(a => {
+    const doctor = db.doctors.find(d => d.id === a.doctorId);
+    return {
+      date: a.date,
+      time: a.time,
+      type: "Прием специалиста", // Заглушка
+      doctor: doctor ? doctor.name : "Неизвестный врач",
+      status: a.status === 'completed' ? 'Завершен' : 'Запланирован'
+    };
+  });
+
+  const fullPatientData = {
+    ...p,
+    treatments: formattedTreatments,
+    visits: formattedVisits
+  };
+  
+  return clone(fullPatientData);
 }
 
 export async function createPatient(data) {
   await delay();
-  maybeFail(0.12);
-
   const name = String(data?.name || "").trim();
   const phone = String(data?.phone || "").replace(/\D/g, "");
   const birthDate = data?.birthDate ? String(data.birthDate) : "";
-
-  if (name.length < 2) throw new Error("Patient name is too short");
-  if (phone.length < 10) throw new Error("Patient phone is invalid");
-
-  // simple unique phone check
-  const exists = db.patients.some((p) => p.phone === phone);
-  if (exists) throw new Error("Patient with this phone already exists");
-
-  const newPatient = { id: genId("p"), name, phone, birthDate };
+  if (name.length < 2) throw new Error("Имя слишком короткое");
+  if (phone.length < 10) throw new Error("Неверный номер телефона");
+  if (db.patients.some((p) => p.phone === phone))
+    throw new Error("Пациент с таким телефоном уже существует");
+  const newPatient = { 
+    id: genId("p"), 
+    name, 
+    phone, 
+    birthDate,
+    createdAt: TODAY // сохраняем дату регистрации
+  };
   db.patients.push(newPatient);
-
+  saveDb();
   return clone(newPatient);
 }
 
 export async function updatePatient(id, patch) {
   await delay();
-  maybeFail(0.12);
-
   const p = db.patients.find((x) => x.id === id);
-  if (!p) throw new Error("Patient not found");
-
+  if (!p) throw new Error("Пациент не найден");
   const name = patch?.name !== undefined ? String(patch.name).trim() : p.name;
   const phone =
     patch?.phone !== undefined
@@ -266,44 +420,59 @@ export async function updatePatient(id, patch) {
     patch?.birthDate !== undefined
       ? String(patch.birthDate || "")
       : p.birthDate;
-
-  if (name.length < 2) throw new Error("Patient name is too short");
-  if (phone.length < 10) throw new Error("Patient phone is invalid");
-
-  // unique phone if changed
-  if (phone !== p.phone) {
-    const exists = db.patients.some((x) => x.phone === phone && x.id !== id);
-    if (exists) throw new Error("Another patient already uses this phone");
+  if (name.length < 2) throw new Error("Имя слишком короткое");
+  if (phone.length < 10) throw new Error("Неверный номер телефона");
+  if (
+    phone !== p.phone &&
+    db.patients.some((x) => x.phone === phone && x.id !== id)
+  ) {
+    throw new Error("Этот телефон уже используется другим пациентом");
   }
-
   p.name = name;
   p.phone = phone;
   p.birthDate = birthDate;
-
+  saveDb();
   return clone(p);
 }
 
-/**
- * VISITS
- * startVisit creates/returns a visit linked to appointment
- * finishVisit finalizes + locks visit and marks appointment completed
- */
+export async function getActiveAppointmentByPatient(patientId) {
+  await delay();
+  const id = String(patientId || "");
+  if (!id) return null;
+  const candidates = db.appointments
+    .filter(
+      (a) =>
+        a.patientId === id &&
+        a.status !== "cancelled" &&
+        a.status !== "completed",
+    )
+    .sort((a, b) => a.time.localeCompare(b.time));
+  const appt = candidates[0];
+  return appt ? clone(appt) : null;
+}
+
+export async function updateAppointmentStatus(appointmentId, status) {
+  await delay(450);
+  validateStatus(status);
+  const appt = db.appointments.find((a) => a.id === appointmentId);
+  if (!appt) throw new Error("Запись не найдена");
+  if (status === "completed" && !appt.visitId)
+    throw new Error("Нельзя завершить без визита");
+  appt.status = status;
+  saveDb();
+  return clone(appt);
+}
+
 export async function startVisit(appointmentId) {
   await delay(700);
-  maybeFail(0.12);
-
   const appt = db.appointments.find((a) => a.id === appointmentId);
-  if (!appt) throw new Error("Appointment not found");
-
-  if (appt.status === "cancelled") throw new Error("Cancelled appointment");
-  if (appt.status === "completed") throw new Error("Visit already completed");
-
-  // If visit already exists, just return it
+  if (!appt) throw new Error("Запись не найдена");
+  if (appt.status === "cancelled") throw new Error("Запись отменена");
+  if (appt.status === "completed") throw new Error("Визит уже завершён");
   if (appt.visitId) {
     const existing = db.visits.find((v) => v.id === appt.visitId);
     if (existing) return clone(existing);
   }
-
   const visit = {
     id: genId("v"),
     appointmentId: appt.id,
@@ -316,152 +485,305 @@ export async function startVisit(appointmentId) {
     notes: "",
     isFinal: false,
   };
-
   db.visits.push(visit);
   appt.visitId = visit.id;
-
-  // Optionally move status to "arrived" when visit starts
   if (appt.status === "scheduled") appt.status = "arrived";
-
+  saveDb();
   return clone(visit);
 }
 
 export async function finishVisit(appointmentId, visitData) {
   await delay(800);
-  maybeFail(0.12);
-
   const appt = db.appointments.find((a) => a.id === appointmentId);
-  if (!appt) throw new Error("Appointment not found");
-
-  if (!appt.visitId) throw new Error("Visit not started");
-
+  if (!appt) throw new Error("Запись не найдена");
+  if (!appt.visitId) throw new Error("Визит не начат");
   const visit = db.visits.find((v) => v.id === appt.visitId);
-  if (!visit) throw new Error("Visit not found");
-
-  if (visit.isFinal) throw new Error("Visit already finalized");
-
+  if (!visit) throw new Error("Визит не найден");
+  if (visit.isFinal) throw new Error("Визит уже завершён");
   const complaint = String(visitData?.complaint || "").trim();
   const diagnosis = String(visitData?.diagnosis || "").trim();
   const notes = String(visitData?.notes || "").trim();
-
-  // minimal validation (you can make stricter)
-  if (complaint.length < 2) throw new Error("Complaint is required");
-  if (diagnosis.length < 2) throw new Error("Diagnosis is required");
-
+  if (complaint.length < 2) throw new Error("Введите жалобу пациента");
+  if (diagnosis.length < 2) throw new Error("Введите диагноз");
   visit.complaint = complaint;
   visit.diagnosis = diagnosis;
   visit.notes = notes;
+  // Расширенные AI-поля (если переданы)
+  if (visitData) {
+    if (visitData.diagnosisCode) {
+      visit.diagnosisCode = String(visitData.diagnosisCode);
+    }
+    if (visitData.cariesType) {
+      visit.cariesType = String(visitData.cariesType);
+    }
+    if (visitData.toothNumber) {
+      visit.toothNumber = String(visitData.toothNumber);
+    }
+    if (visitData.protocol && typeof visitData.protocol === "object") {
+      visit.protocol = {
+        complaints: String(visitData.protocol.complaints || ""),
+        anamnesis: String(visitData.protocol.anamnesis || ""),
+        objective: String(visitData.protocol.objective || ""),
+        diagnosisText: String(visitData.protocol.diagnosisText || ""),
+        treatment: String(visitData.protocol.treatment || ""),
+      };
+    }
+    if (Array.isArray(visitData.materials)) {
+      visit.materials = visitData.materials.map((m) => ({
+        code: String(m.code || ""),
+        name: String(m.name || ""),
+        qty: Number(m.qty) || 0,
+        unit: String(m.unit || ""),
+      }));
+    }
+  }
   visit.isFinal = true;
   visit.finishedAt = new Date().toISOString();
+  appt.status = "completed";
 
-  appt.status = "completed"; // important requirement
+  // Автосписание со склада
+  if (db.inventory) {
+    // 1) Если Core AI передал конкретные материалы — используем их
+    if (Array.isArray(visit.materials) && visit.materials.length) {
+      for (const m of visit.materials) {
+        const qty = Number(m.qty) || 0;
+        if (!qty) continue;
+        const code = String(m.code || "").toLowerCase();
+        const name = String(m.name || "").toLowerCase();
+        const item =
+          db.inventory.find((i) =>
+            code ? i.name.toLowerCase().includes(code) : false,
+          ) ||
+          db.inventory.find((i) =>
+            name ? i.name.toLowerCase().includes(name) : false,
+          );
+        if (item && item.quantity > 0) {
+          item.quantity = Math.max(0, item.quantity - qty);
+        }
+      }
+    } else {
+      // 2) Иначе — старый текстовый парсер (для других модулей)
+      const textToAnalyze = (notes + " " + diagnosis).toLowerCase();
+      
+      if (textToAnalyze.includes("имплант") || textToAnalyze.includes("straumann")) {
+        const item = db.inventory.find(i => i.name.toLowerCase().includes("straumann"));
+        if (item && item.quantity > 0) item.quantity -= 1;
+      }
+      
+      if (textToAnalyze.includes("пломб") || textToAnalyze.includes("filtek")) {
+        const item = db.inventory.find(i => i.name.toLowerCase().includes("filtek"));
+        if (item && item.quantity > 0) item.quantity -= 1;
+      }
 
+      if (textToAnalyze.includes("анестези") || textToAnalyze.includes("ultracain")) {
+        const item = db.inventory.find(i => i.name.toLowerCase().includes("ultracain"));
+        if (item && item.quantity > 0) item.quantity -= 1;
+      }
+    }
+  }
+
+  saveDb();
   return clone(visit);
 }
 
-/**
- * APPOINTMENT STATUS UPDATE (optional, handy)
- */
-export async function updateAppointmentStatus(appointmentId, status) {
-  await delay(450);
-  maybeFail(0.12);
-
-  validateStatus(status);
-
-  const appt = db.appointments.find((a) => a.id === appointmentId);
-  if (!appt) throw new Error("Appointment not found");
-
-  // basic rule: if completed -> must have visit
-  if (status === "completed" && !appt.visitId) {
-    throw new Error("Cannot complete without a visit");
-  }
-
-  appt.status = status;
-  return clone(appt);
-}
-
-/**
- * PAYMENTS
- */
 export async function createPayment(data) {
   await delay(650);
-  maybeFail(0.12);
-
   const amount = Number(data?.amount);
   const method = String(data?.method || "");
   const patientId = String(data?.patientId || "");
   const visitId = data?.visitId ? String(data.visitId) : null;
-
   if (!Number.isFinite(amount) || amount <= 0)
-    throw new Error("Amount must be > 0");
+    throw new Error("Сумма должна быть больше 0");
   validatePaymentMethod(method);
-  if (!patientId) throw new Error("Patient is required");
-
+  if (!patientId) throw new Error("Выберите пациента");
   const payment = {
     id: genId("pay"),
     date: data?.date ? String(data.date) : TODAY,
-    time: new Date().toTimeString().slice(0, 5), // "HH:MM"
+    time: new Date().toTimeString().slice(0, 5),
     patientId,
     visitId,
     amount,
-    method, // cash | card
+    method,
   };
-
   db.payments.push(payment);
+  saveDb();
   return clone(payment);
 }
 
 export async function getPaymentsByDate(date) {
   await delay(450);
-  maybeFail(0.1);
-
-  if (!date) throw new Error("Date is required");
-
+  if (!date) throw new Error("Выберите дату");
   const list = db.payments
     .filter((p) => p.date === date)
     .sort((a, b) => a.time.localeCompare(b.time))
-    .map((p) => ({
-      ...p,
-      patientName: getPatientName(p.patientId),
-    }));
-
+    .map((p) => ({ ...p, patientName: getPatientName(p.patientId) }));
   return clone(list);
 }
 
-/**
- * DAY REPORT
- * - list of payments for date
- * - total sum
- * - completed visits count (appointments completed for date)
- */
 export async function getDayReport(date) {
   await delay(700);
-  maybeFail(0.12);
-
-  if (!date) throw new Error("Date is required");
-
+  if (!date) throw new Error("Выберите дату");
   const payments = await getPaymentsByDate(date);
-
   const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
-
   const visitsCompleted = db.appointments.filter(
     (a) => a.date === date && a.status === "completed",
   ).length;
+  // AI-сигналы по визитам за день
+  const aiSignals = {
+    cariesByType: {
+      surface: 0,
+      medium: 0,
+      deep: 0,
+      complicated: 0,
+    },
+    teethByCount: {}, // { "16": 3, "46": 1, ... }
+  };
 
-  return clone({
-    date,
-    payments,
-    totalAmount,
-    visitsCompleted,
-  });
+  const completedAppts = db.appointments.filter(
+    (a) => a.date === date && a.visitId,
+  );
+  for (const appt of completedAppts) {
+    const v = db.visits.find((x) => x.id === appt.visitId);
+    if (!v) continue;
+    const type = v.cariesType;
+    if (type && aiSignals.cariesByType[type] !== undefined) {
+      aiSignals.cariesByType[type] += 1;
+    }
+    const tooth = v.toothNumber;
+    if (tooth) {
+      aiSignals.teethByCount[tooth] = (aiSignals.teethByCount[tooth] || 0) + 1;
+    }
+  }
+
+  // Оставим только топ-5 зубов по частоте
+  const teethEntries = Object.entries(aiSignals.teethByCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  aiSignals.teethByCount = Object.fromEntries(teethEntries);
+
+  return clone({ date, payments, totalAmount, visitsCompleted, aiSignals });
 }
 
-/**
- * Debug helpers (optional)
- * Useful during dev to see what's inside DB.
- * Remove later if you want.
- */
-export async function __debugDump() {
-  await delay(150);
-  return clone(db);
+export async function getVisitsByPatient(patientId) {
+  await delay(500);
+  if (!patientId) throw new Error("Пациент не выбран");
+  const list = db.visits
+    .filter((v) => v.patientId === patientId)
+    .sort((a, b) => {
+      const aTime = a.startedAt || "";
+      const bTime = b.startedAt || "";
+      return bTime.localeCompare(aTime);
+    })
+    .map((v) => ({
+      id: v.id,
+      startedAt: v.startedAt,
+      finishedAt: v.finishedAt,
+      diagnosis: v.diagnosis || v.protocol?.diagnosisText || "",
+      diagnosisCode: v.diagnosisCode || "",
+      cariesType: v.cariesType || "",
+      toothNumber: v.toothNumber || "",
+      isFinal: !!v.isFinal,
+    }));
+  return clone(list);
+}
+
+export async function getInventoryItems() {
+  await delay(400);
+  // Return sorted by category then name
+  const list = (db.inventory || []).sort((a, b) => {
+    if (a.category < b.category) return -1;
+    if (a.category > b.category) return 1;
+    return a.name.localeCompare(b.name);
+  });
+  return clone(list);
+}
+
+export async function addInventoryItem(data) {
+  await delay(500);
+  const name = String(data?.name || "").trim();
+  const category = String(data?.category || "").trim();
+  const quantity = Number(data?.quantity) || 0;
+  const minQuantity = Number(data?.minQuantity) || 0;
+  const unit = String(data?.unit || "шт").trim();
+
+  if (name.length < 2) throw new Error("Название слишком короткое");
+  if (!category) throw new Error("Укажите категорию");
+
+  const newItem = {
+    id: genId("inv"),
+    name,
+    category,
+    quantity,
+    minQuantity,
+    unit
+  };
+
+  if (!db.inventory) db.inventory = [];
+  db.inventory.push(newItem);
+  saveDb();
+  return clone(newItem);
+}
+
+export async function updateInventoryQuantity(id, delta) {
+  await delay(300);
+  if (!db.inventory) db.inventory = [];
+  const item = db.inventory.find(x => x.id === id);
+  if (!item) throw new Error("Материал не найден");
+  
+  const newQty = item.quantity + delta;
+  if (newQty < 0) throw new Error("Недостаточно на складе");
+  
+  item.quantity = newQty;
+  saveDb();
+  return clone(item);
+}
+
+// ——— Пользователи (staff) ———
+const ROLES = ["owner", "admin", "doctor", "assistant"];
+
+export async function getUsers(query = "") {
+  await delay(350);
+  const q = String(query).trim().toLowerCase();
+  const list = (db.users || [])
+    .filter(u => !q || u.name.toLowerCase().includes(q) || String(u.phone).includes(q) || (u.email || "").toLowerCase().includes(q))
+    .sort((a, b) => (a.role === "owner" ? -1 : b.role === "owner" ? 1 : 0) || a.name.localeCompare(b.name));
+  return clone(list);
+}
+
+export async function createUser(data) {
+  await delay(400);
+  const name = String(data?.name || "").trim();
+  const phone = String(data?.phone || "").replace(/\D/g, "");
+  const email = String(data?.email || "").trim();
+  const role = ROLES.includes(data?.role) ? data.role : "admin";
+  if (name.length < 2) throw new Error("Имя слишком короткое");
+  if (phone.length < 10) throw new Error("Неверный номер телефона");
+  if (db.users.some(u => u.phone === phone)) throw new Error("Пользователь с таким телефоном уже есть");
+  const newUser = {
+    id: genId("u"),
+    name,
+    phone,
+    email,
+    role,
+    isActive: true,
+    createdAt: new Date().toISOString().slice(0, 10),
+  };
+  db.users.push(newUser);
+  saveDb();
+  return clone(newUser);
+}
+
+export async function updateUser(id, patch) {
+  await delay(400);
+  const u = db.users.find(x => x.id === id);
+  if (!u) throw new Error("Пользователь не найден");
+  if (patch.name !== undefined) u.name = String(patch.name).trim();
+  if (patch.phone !== undefined) u.phone = String(patch.phone).replace(/\D/g, "");
+  if (patch.email !== undefined) u.email = String(patch.email).trim();
+  if (patch.role !== undefined && ROLES.includes(patch.role)) u.role = patch.role;
+  if (patch.isActive !== undefined) u.isActive = !!patch.isActive;
+  if (u.name.length < 2) throw new Error("Имя слишком короткое");
+  if (u.phone.length < 10) throw new Error("Неверный номер телефона");
+  saveDb();
+  return clone(u);
 }

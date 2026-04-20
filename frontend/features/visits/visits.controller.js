@@ -18,110 +18,102 @@ export async function mountVisitPage() {
   page.innerHTML = renderVisitPageShell();
 
   const card = document.getElementById("visitCard");
-  card.innerHTML = renderVisitLoading("Loading appointment…");
+  card.innerHTML = renderVisitLoading("Загрузка записи…");
 
   try {
     const apptId = getIdFromHash();
-    if (!apptId) throw new Error("Appointment id is missing");
+    if (!apptId) throw new Error("ID записи не найден");
 
-    // We need appointment details.
-    // Easiest way: load schedule for current selected doctor/date, then find appointment.
-    // If not found (maybe different doctor/date), we load doctors and try all for selectedDate.
-    const appointment = await findAppointmentById(apptId);
-    if (!appointment) throw new Error("Appointment not found");
+    let appointment = await findAppointmentById(apptId);
+    if (!appointment) throw new Error("Запись не найдена");
 
-    // visit can be null until started
-    const visit = appointment.visitId ? { id: appointment.visitId } : null;
+    // Рендерим форму
+    renderForm(appointment, null, false);
 
-    // render initial form
-    render(appointment, null, false);
-
-    // handlers
-    document
-      .getElementById("backToScheduleBtn")
-      ?.addEventListener("click", () => {
+    // Слушаем клики через делегирование на card — чтобы не терять после ре-рендера
+    card.addEventListener("click", async (e) => {
+      // Кнопка "Назад"
+      if (e.target.closest("#backToScheduleBtn")) {
         window.location.hash = "#schedule";
-      });
+        return;
+      }
 
-    document
-      .getElementById("startVisitBtn")
-      ?.addEventListener("click", async () => {
-        const startBtn = document.getElementById("startVisitBtn");
-        startBtn.disabled = true;
+      // Кнопка "Начать визит"
+      if (e.target.closest("#startVisitBtn")) {
+        const btn = e.target.closest("#startVisitBtn");
+        if (btn.disabled) return;
+        btn.disabled = true;
 
         try {
-          card.innerHTML = renderVisitLoading("Starting visit…");
+          card.innerHTML = renderVisitLoading("Начинаем визит…");
           const v = await startVisit(appointment.id);
-
-          // refresh appointment to update status/visitId
-          const refreshed = await findAppointmentById(appointment.id);
-          render(refreshed, v, v.isFinal);
+          appointment = await findAppointmentById(appointment.id);
+          renderForm(appointment, v, v.isFinal);
         } catch (err) {
-          card.innerHTML = renderVisitError(
-            err?.message || "Failed to start visit",
-          );
-          // rerender again
-          const refreshed = await findAppointmentById(appointment.id);
-          render(refreshed, null, false);
+          appointment = await findAppointmentById(appointment.id);
+          renderForm(appointment, null, false);
+          showError(err?.message || "Не удалось начать визит");
         }
-      });
+        return;
+      }
+    });
 
-    document
-      .getElementById("visitForm")
-      ?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const errBox = document.getElementById("visitError");
-        errBox.textContent = "";
+    // Слушаем submit через делегирование на card
+    card.addEventListener("submit", async (e) => {
+      if (!e.target.closest("#visitForm")) return;
+      e.preventDefault();
 
-        const finishBtn = document.getElementById("finishVisitBtn");
-        finishBtn.disabled = true;
-        const old = finishBtn.textContent;
-        finishBtn.textContent = "Finishing…";
+      const finishBtn = document.getElementById("finishVisitBtn");
+      if (!finishBtn || finishBtn.disabled) return;
 
-        try {
-          const fd = new FormData(e.target);
-          const payload = {
-            complaint: fd.get("complaint"),
-            diagnosis: fd.get("diagnosis"),
-            notes: fd.get("notes"),
-          };
+      showError("");
+      finishBtn.disabled = true;
+      const oldText = finishBtn.textContent;
+      finishBtn.textContent = "Завершаем…";
 
-          const v = await finishVisit(appointment.id, payload);
+      try {
+        const fd = new FormData(e.target);
+        const payload = {
+          complaint: fd.get("complaint"),
+          diagnosis: fd.get("diagnosis"),
+          notes: fd.get("notes"),
+        };
 
-          const refreshed = await findAppointmentById(appointment.id);
-          render(refreshed, v, true);
-        } catch (err) {
-          errBox.textContent = err?.message || "Finish failed";
-        } finally {
-          finishBtn.textContent = old;
-          // if success we re-rendered locked form, so enable is not needed.
+        const v = await finishVisit(appointment.id, payload);
+        appointment = await findAppointmentById(appointment.id);
+        renderForm(appointment, v, true);
+      } catch (err) {
+        showError(err?.message || "Не удалось завершить визит");
+        if (finishBtn) {
           finishBtn.disabled = false;
+          finishBtn.textContent = oldText;
         }
-      });
+      }
+    });
   } catch (err) {
     card.innerHTML = renderVisitError(
-      err?.message || "Failed to load visit page",
+      err?.message || "Ошибка загрузки страницы визита",
     );
   }
 
-  function render(appointment, visit, isFinal) {
+  function renderForm(appointment, visit, isFinal) {
     card.innerHTML = renderVisitForm({ appointment, visit, isFinal });
+  }
+
+  function showError(msg) {
+    const errBox = document.getElementById("visitError");
+    if (errBox) errBox.textContent = msg;
   }
 }
 
 function getIdFromHash() {
   const hash = window.location.hash || "";
   const qs = hash.split("?")[1] || "";
-  const params = new URLSearchParams(qs);
-  return params.get("id");
+  return new URLSearchParams(qs).get("id");
 }
 
-// Tries to find appointment by scanning schedules.
-// For mock it is enough.
 async function findAppointmentById(appointmentId) {
   const state = getState();
-
-  // ensure doctors exist
   let doctors = state.doctors;
   if (!doctors || !doctors.length) {
     doctors = await getDoctors();
@@ -130,14 +122,12 @@ async function findAppointmentById(appointmentId) {
 
   const date = state.selectedDate;
 
-  // try selectedDoctor first
   if (state.selectedDoctorId) {
     const list = await getSchedule(state.selectedDoctorId, date);
     const found = list.find((a) => a.id === appointmentId);
     if (found) return found;
   }
 
-  // scan all doctors for selected date
   for (const d of doctors) {
     const list = await getSchedule(d.id, date);
     const found = list.find((a) => a.id === appointmentId);

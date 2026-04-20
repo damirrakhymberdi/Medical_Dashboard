@@ -1,6 +1,5 @@
-// core/state.js
 const state = {
-  user: null, // кейін auth-та толтырылады
+  user: null,
   selectedDoctorId: "",
   selectedDate: new Date().toISOString().slice(0, 10),
 

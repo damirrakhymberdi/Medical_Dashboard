@@ -9,8 +9,8 @@ export function renderInput({
   disabled = false,
 }) {
   return `
-    <label class="muted" style="font-size:12px; display:grid; gap:6px;">
-      ${label}
+    <label class="field">
+      <span class="field-label">${label}</span>
       <input
         class="input"
         name="${name}"
@@ -31,8 +31,8 @@ export function renderTextarea({
   disabled = false,
 }) {
   return `
-    <label class="muted" style="font-size:12px; display:grid; gap:6px;">
-      ${label}
+    <label class="field">
+      <span class="field-label">${label}</span>
       <textarea
         class="input"
         name="${name}"
